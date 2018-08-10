@@ -1,7 +1,5 @@
-# ipvanish
-
-## Features
-
+"""
+Features:
     * Scanning available servers
     * Caching the status of servers
     * Showing all information about servers
@@ -13,3 +11,4 @@
     * Connecting to the IPVanish servers
         * Random server selection with filtering options for continent, country
         * Connecting to specific server
+"""
