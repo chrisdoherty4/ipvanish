@@ -1,4 +1,7 @@
-from commands import ListContinentsCommand
+from commands import (ListContinentsCommand,
+                      ListCountriesCommand,
+                      ListRegionsCommand,
+                      ListCitiesCommand)
 from argparse import ArgumentParser, RawTextHelpFormatter
 from server import ServerContainer
 
@@ -16,7 +19,13 @@ class Vanish(object):
             "/home/chrisdoherty/Downloads/servers.geojson")
 
         self._commands = {}
-        self._commands['list.cities'] = ListContinentsCommand(
+        self._commands['list.continents'] = ListContinentsCommand(
+            self._server_container)
+        self._commands['list.countries'] = ListCountriesCommand(
+            self._server_container)
+        self._commands['list.regions'] = ListRegionsCommand(
+            self._server_container)
+        self._commands['list.cities'] = ListCitiesCommand(
             self._server_container)
 
     def execute(self, args=None):
