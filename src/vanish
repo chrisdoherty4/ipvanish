@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+from ipvanish.handler import Vanish, VanishArgumentParser
+
+if __name__ == "__main__":
+    vanish = Vanish(VanishArgumentParser())
+    vanish.execute()

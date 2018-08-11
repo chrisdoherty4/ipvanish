@@ -1,5 +1,4 @@
 import json
-from collections import OrderedDict
 
 
 class ServerContainer(object):
@@ -16,10 +15,9 @@ class ServerContainer(object):
         for server in self._servers_json:
             del server['properties']['marker-color']
             del server['properties']['marker-cluster-small']
-            ordered = OrderedDict(sorted(server['properties'].items()))
-            self._servers.append(ordered)
+            self._servers.append(server['properties'])
 
-    def get_servers(self, continents=None, countries=None, regions=None, cities=None):
+    def getServers(self, continents=None, countries=None, regions=None, cities=None):
         '''
         Retrieve a list of servers and their associated information.
 
@@ -35,20 +33,20 @@ class ServerContainer(object):
         servers = self._servers
 
         if continents:
-            servers = self._filter_continents(servers, continents)
+            servers = self._filterContinents(servers, continents)
 
         if countries:
-            servers = self._filter_countries(servers, countries)
+            servers = self._filterCountries(servers, countries)
 
         if regions:
-            servers = self._filter_regions(servers, regions)
+            servers = self._filterRegions(servers, regions)
 
         if cities:
-            servers = self._filter_cities(servers, cities)
+            servers = self._filterCities(servers, cities)
 
         return servers
 
-    def get_continents(self):
+    def getContinents(self):
         '''
         Retrieve a dictionary of continents.
 
@@ -62,7 +60,7 @@ class ServerContainer(object):
 
         return continents
 
-    def get_countries(self, continents=None):
+    def getCountries(self, continents=None):
         '''
         Retrieve a dictionary of countries.
 
@@ -72,7 +70,7 @@ class ServerContainer(object):
         servers = self._servers
 
         if continents:
-            servers = self._filter_continents(servers, continents)
+            servers = self._filterContinents(servers, continents)
 
         countries = {}
 
@@ -82,7 +80,7 @@ class ServerContainer(object):
 
         return countries
 
-    def get_regions(self, continents=None, countries=None):
+    def getRegions(self, continents=None, countries=None):
         '''
         Retrieve a dictionary of regions.
 
@@ -93,10 +91,10 @@ class ServerContainer(object):
         servers = self._servers
 
         if continents:
-            servers = self._filter_continents(servers, continents)
+            servers = self._filterContinents(servers, continents)
 
         if countries:
-            servers = self._filter_countries(servers, countries)
+            servers = self._filterCountries(servers, countries)
 
         regions = {}
 
@@ -106,7 +104,7 @@ class ServerContainer(object):
 
         return regions
 
-    def get_cities(self, continents=None, countries=None, regions=None):
+    def getCities(self, continents=None, countries=None, regions=None):
         '''
         Retrieve cities with optional filters.
 
@@ -120,27 +118,24 @@ class ServerContainer(object):
         servers = self._servers
 
         if continents:
-            servers = self._filter_continents(servers, continents)
+            servers = self._filterContinents(servers, continents)
 
         if countries:
-            servers = self._filter_countries(servers, countries)
+            servers = self._filterCountries(servers, countries)
 
         if regions:
-            servers = self._filter_regions(servers, regions)
+            servers = self._filterRegions(servers, regions)
 
         return set([server['city'] for server in servers])
 
-    def _filter_continents(self, servers, continents):
-        return filter(lambda x: set([x['continent'], x['continentCode']]).issubset(
-            set(continents)), servers)
+    def _filterContinents(self, servers, continents):
+        return filter(lambda s: s['continent'] in continents or s['continentCode'] in continents, servers)
 
-    def _filter_countries(self, servers, countries):
-        return filter(lambda x: set([x['country'], x['countryCode']]).issubset(
-            set(countries)), servers)
+    def _filterCountries(self, servers, countries):
+        return filter(lambda s: s['country'] in countries or s['countryCode'] in countries, servers)
 
-    def _filter_regions(self, servers, regions):
-        return filter(lambda x: set(
-            [x['region'], x['regionCode'], x['regionAbbr']]).issubset(set(regions)), servers)
+    def _filterRegions(self, servers, regions):
+        return filter(lambda s: s['region'] in regions or s['regionCode'] in regions or s['regionAbbr'] in regions, servers)
 
-    def _filter_cities(self, servers, cities):
+    def _filterCities(self, servers, cities):
         return filter(lambda x: x['city'] in cities, servers)
