@@ -1,6 +1,99 @@
 #!/usr/bin/env python
-from ipvanish.handler import Vanish, VanishArgumentParser
+from ipvanish.application import Vanish
+from argparse import ArgumentParser, RawTextHelpFormatter
+
+
+class ConsoleApplication(object):
+    """
+    Defines the arguments that can be parsed by the vanish application.
+    """
+
+    def __init__(self, app):
+        self._app = app
+        self._parser = ArgumentParser(
+            "vanish",
+            formatter_class=RawTextHelpFormatter,
+            description='Vanish is a tool that helps users on linux connect to IPVanish VPN servers.')
+
+        self._command_parser = self._parser.add_subparsers(dest='command')
+
+        self._addListParser()
+        self._addConnectParser()
+
+    def run(self, args=None):
+        arguments = vars(self._parser.parse_args(args))
+        if 'subcommand' in arguments:
+            command = "{}.{}".format(arguments['command'],
+                                     arguments['subcommand'])
+            del arguments['subcommand']
+        else:
+            command = arguments['command']
+
+        del arguments['command']
+
+        return self._app.run(command, arguments)
+
+    def _addConnectParser(self):
+        self._command_parser.add_parser(
+            'connect',
+            description='Connect to an IPVanish server'
+            )
+
+    def _addListParser(self):
+        list_parser = self._command_parser.add_parser(
+            'list',
+            description='Retrieve server locations or generate a full server list'
+            )
+
+        list_parser.add_argument(
+            'subcommand',
+            metavar='SUBCOMMAND',
+            nargs='?',
+            default='servers',
+            choices=['servers', 'continents', 'countries', 'regions', 'cities'])
+
+        filter_group = list_parser.add_argument_group('Filters')
+        self._addAllServerFilters(filter_group)
+
+    def _addContinentsFilter(self, parser):
+        parser.add_argument(
+            '--continent',
+            action='append',
+            dest='continents',
+            metavar='CONTINENT'
+            )
+
+    def _addCountriesFilter(self, parser):
+        parser.add_argument(
+            '--country',
+            action='append',
+            dest='countries',
+            metavar='COUNTRY'
+            )
+
+    def _addRegionsFilter(self, parser):
+        parser.add_argument(
+            '--region',
+            action='append',
+            dest='regions',
+            metavar='REGION'
+            )
+
+    def _addCitiesFilter(self, parser):
+        parser.add_argument(
+            '--city',
+            action='append',
+            dest='cities',
+            metavar='CITY'
+            )
+
+    def _addAllServerFilters(self, parser):
+        self._addContinentsFilter(parser)
+        self._addCountriesFilter(parser)
+        self._addRegionsFilter(parser)
+        self._addCitiesFilter(parser)
+
 
 if __name__ == "__main__":
-    vanish = Vanish(VanishArgumentParser())
-    vanish.execute()
+    console = ConsoleApplication(Vanish())
+    console.run()

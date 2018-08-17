@@ -1,1 +1,1 @@
-__all__ = ['commands', 'server', 'handler']
+__all__ = ['application']
