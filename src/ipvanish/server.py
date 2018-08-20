@@ -7,6 +7,7 @@ class ServerContainer(object):
     '''
 
     def __init__(self, server_json_path):
+
         with open(server_json_path) as h:
             self._servers_json = json.load(h, encoding="utf-8")
 

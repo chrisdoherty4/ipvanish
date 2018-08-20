@@ -1,4 +1,22 @@
 import subprocess
+import json
+import os
+import random
+import requests
+import shutil
+import zipfile
+import re
+import time
+from .utils import sha256_checksum
+
+"""
+TODO: Create commands:
+    * PingServersCommand
+    * WriteConfigCommand
+    * ShowServerStatusCommand
+    * ListServerCapacitiesCommand
+    *
+"""
 
 
 class Command(object):
@@ -23,15 +41,102 @@ class ConnectCommand(Command):
     """
 
     def execute(self, arguments):
-        # p = subprocess.call([
-        #         'openvpn',
-        #         '--config',
-        #         '/media/hdd1/Downloads/ipvanish/ipvanish-UK-London-lon-a68.ovpn'
-        #         ], cwd="/media/hdd1/Downloads/ipvanish")
-        #
-        # print(p)
+        servers = self._services['servers'].getServers(
+            continents=arguments['continents'],
+            countries=arguments['countries'],
+            regions=arguments['regions'],
+            cities=arguments['cities']
+            )
 
-        print(self._services['config']['cache.server.geojson'])
+        server = random.choice(servers)
+        # TODO: Edit out after doing work to cache a better geojson
+        config_file = "{}.ovpn".format("-".join([server['countryCode'],
+                                                 server['hostname'].split('.')[0]]).lower()
+                                       )
+
+        command = "openvpn --config {}".format(os.path.join(
+            self._services['config']['ovpn.configs.dir'], config_file))
+
+        subprocess.check_call(
+            command, cwd=self._services['config']['ovpn.configs.dir'])
+
+
+class PingServersCommand(Command):
+    def execute(self, arguments):
+        servers = self._services['servers'].getServers(
+            continents=arguments['continents'],
+            countries=arguments['countries'],
+            regions=arguments['regions'],
+            cities=arguments['cities'])
+
+        print("Pinging servers ...")
+
+        for server in servers:
+            try:
+                response = subprocess.check_output(
+                    ['ping', '-c', '1', '-W', '1', server['ip']])
+
+                response_time = re.search(
+                    "time=(.*)", response)
+                print("\033[1m{title} ({host})\033[0m".format(
+                    title=server['title'],
+                    host=server['hostname']))
+                print("  Load: {load}%; Response {ping}".format(
+                    load=server['capacity'],
+                    ping=response_time.group(0)))
+            except subprocess.CalledProcessError:
+                print("Failed to ping {host}".format(host=server['hostname']))
+
+            exit()
+
+
+class UpdateOvpnConfigs(Command):
+    """
+    Updates the ovpn configurations with the latest from IPVanish.
+    """
+
+    def execute(self, arguments):
+        response = requests.get(self._services['config']['ovpn.configs.url'])
+
+        configs_zip = os.path.join(
+            self._services['config']['config.dir'], 'configs.zip')
+        configs_zip_prev = os.path.join(
+            self._services['config']['config.dir'], 'configs.zip.prev')
+
+        with open(configs_zip, 'w') as h:
+            h.write(response.content)
+
+        # If there is no previous configs zip, or the previous config zip exists
+        # and the sha sums between the latest and old are different update
+        # the configs.
+        if ((os.path.exists(configs_zip_prev)
+                and sha256_checksum(configs_zip) != sha256_checksum(configs_zip_prev))
+                or not os.path.exists(configs_zip_prev)):
+            shutil.rmtree(self._services['config']['ovpn.configs.dir'])
+
+            with zipfile.ZipFile(configs_zip, 'r') as zip:
+                zip.extractall(self._services['config']['ovpn.configs.dir'])
+
+            os.rename(configs_zip, configs_zip_prev)
+
+            for file in os.listdir(self._services['config']['ovpn.configs.dir']):
+                if "ovpn" in file:
+                    parts = re.search(
+                        '^ipvanish-([A-Z]{2})-.+-([a-z]{3}-[a-c]{1}[0-9]{2}.ovpn)$',
+                        file
+                        )
+                    dest = "-".join([parts.group(1), parts.group(2)]).lower()
+
+                    os.rename(
+                        os.path.join(
+                            self._services['config']['ovpn.configs.dir'], file),
+                        os.path.join(
+                            self._services['config']['ovpn.configs.dir'], dest)
+                        )
+
+            self._services['cache'].save('ovpn.configs', time.time())
+        else:
+            os.remove(configs_zip)
 
 
 class ListContinentsCommand(Command):
@@ -41,7 +146,8 @@ class ListContinentsCommand(Command):
 
     def execute(self, arguments):
         continents = self._services['servers'].getContinents()
-        print(continents)
+
+        print(json.dumps(continents, indent=4, sort_keys=True))
 
 
 class ListCountriesCommand(Command):
@@ -55,7 +161,7 @@ class ListCountriesCommand(Command):
         countries = self._services['servers'].getCountries(
             continents=continents)
 
-        print(countries)
+        print(json.dumps(countries, indent=4, sort_keys=True))
 
 
 class ListRegionsCommand(Command):
@@ -70,7 +176,7 @@ class ListRegionsCommand(Command):
         regions = self._services['servers'].getRegions(
             continents=continents, countries=countries)
 
-        print(regions)
+        print(json.dumps(regions, indent=4, sort_keys=True))
 
 
 class ListCitiesCommand(Command):
@@ -86,4 +192,25 @@ class ListCitiesCommand(Command):
         cities = self._services['servers'].getCities(
             continents=continents, countries=countries, regions=regions)
 
-        print(cities)
+        print(json.dumps(list(cities), indent=4, sort_keys=True))
+
+
+class ListServersCommand(Command):
+    """
+    List cities command
+    """
+
+    def execute(self, arguments):
+        continents = arguments['continents'] if arguments['continents'] else None
+        countries = arguments['countries'] if arguments['countries'] else None
+        regions = arguments['regions'] if arguments['regions'] else None
+        cities = arguments['regions'] if arguments['regions'] else None
+
+        servers = self._services['servers'].getServers(
+            continents=continents,
+            countries=countries,
+            regions=regions,
+            cities=cities
+            )
+
+        print(json.dumps(list(servers), indent=4, sort_keys=True))

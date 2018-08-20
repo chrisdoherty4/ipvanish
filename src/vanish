@@ -19,6 +19,8 @@ class ConsoleApplication(object):
 
         self._addListParser()
         self._addConnectParser()
+        self._addConfigsUpdate()
+        self._addPingServer()
 
     def run(self, args=None):
         arguments = vars(self._parser.parse_args(args))
@@ -33,16 +35,30 @@ class ConsoleApplication(object):
 
         return self._app.run(command, arguments)
 
-    def _addConnectParser(self):
+    def _addPingServer(self):
+        ping = self._command_parser.add_parser(
+            'ping', help='Ping IPVanish servers.')
+
+        filter_group = ping.add_argument_group('filters')
+        self._addAllServerFilters(filter_group)
+
+    def _addConfigsUpdate(self):
         self._command_parser.add_parser(
+            'update-configs', help="Update the OpenVPN configuration files.")
+
+    def _addConnectParser(self):
+        connect_parser = self._command_parser.add_parser(
             'connect',
-            description='Connect to an IPVanish server'
+            help='Connect to an IPVanish server'
             )
+
+        filter_group = connect_parser.add_argument_group('filters')
+        self._addAllServerFilters(filter_group)
 
     def _addListParser(self):
         list_parser = self._command_parser.add_parser(
             'list',
-            description='Retrieve server locations or generate a full server list'
+            help='Retrieve server locations or generate a full server list'
             )
 
         list_parser.add_argument(
@@ -52,7 +68,7 @@ class ConsoleApplication(object):
             default='servers',
             choices=['servers', 'continents', 'countries', 'regions', 'cities'])
 
-        filter_group = list_parser.add_argument_group('Filters')
+        filter_group = list_parser.add_argument_group('filters')
         self._addAllServerFilters(filter_group)
 
     def _addContinentsFilter(self, parser):
