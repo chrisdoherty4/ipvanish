@@ -58,6 +58,12 @@ class ConsoleApplication(object):
             default=None,
             )
 
+        connect_parser.add_argument(
+            '--auth-user-pass',
+            default=None,
+            help="A credentials file with username and password for openvpn"
+            )
+
         filter_group = connect_parser.add_argument_group('filters')
         self._addAllServerFilters(filter_group)
 

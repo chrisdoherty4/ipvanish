@@ -64,6 +64,10 @@ class ConnectCommand(Command):
         command = ['openvpn', '--config', os.path.join(
             self._services['config']['ovpn.configs.dir'], config_file)]
 
+        if arguments['auth_user_pass']:
+            command.extend(['--auth-user-pass', os.path.abspath(os.path.join(
+                os.getcwd(), arguments['auth_user_pass']))])
+
         subprocess.check_call(
             command, cwd=self._services['config']['ovpn.configs.dir'])
 
