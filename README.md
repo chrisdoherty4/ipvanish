@@ -1,7 +1,6 @@
 # Vanish
 
-## Overview
-Vanish an installable python application that interacts with the IPVanish servers. It can
+Vanish is an installable python application that interacts with the IPVanish servers. It can
 grab the latest server configurations and intelligently detect what servers to connec to
 based on user defined filtering.
 
