@@ -17,8 +17,8 @@ class ConsoleApplication(object):
 
         self._command_parser = self._parser.add_subparsers(dest='command')
 
-        self._addListParser()
-        self._addConnectParser()
+        self._addList()
+        self._addConnect()
         self._addConfigsUpdate()
         self._addPingServer()
 
@@ -46,16 +46,22 @@ class ConsoleApplication(object):
         self._command_parser.add_parser(
             'update-configs', help="Update the OpenVPN configuration files.")
 
-    def _addConnectParser(self):
+    def _addConnect(self):
         connect_parser = self._command_parser.add_parser(
             'connect',
             help='Connect to an IPVanish server'
             )
 
+        connect_parser.add_argument(
+            '--server',
+            metavar="SERVER",
+            default=None,
+            )
+
         filter_group = connect_parser.add_argument_group('filters')
         self._addAllServerFilters(filter_group)
 
-    def _addListParser(self):
+    def _addList(self):
         list_parser = self._command_parser.add_parser(
             'list',
             help='Retrieve server locations or generate a full server list'

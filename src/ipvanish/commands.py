@@ -41,21 +41,28 @@ class ConnectCommand(Command):
     """
 
     def execute(self, arguments):
-        servers = self._services['servers'].getServers(
-            continents=arguments['continents'],
-            countries=arguments['countries'],
-            regions=arguments['regions'],
-            cities=arguments['cities']
-            )
+        # TODO: Intelligently select server
+        # TODO: Force a GeoJson update.
 
-        server = random.choice(servers)
-        # TODO: Edit out after doing work to cache a better geojson
-        config_file = "{}.ovpn".format("-".join([server['countryCode'],
-                                                 server['hostname'].split('.')[0]]).lower()
-                                       )
+        if not arguments['server']:
+            # TODO: Intelligently select a server
+            servers = self._services['servers'].getServers(
+                continents=arguments['continents'],
+                countries=arguments['countries'],
+                regions=arguments['regions'],
+                cities=arguments['cities']
+                )
 
-        command = "openvpn --config {}".format(os.path.join(
-            self._services['config']['ovpn.configs.dir'], config_file))
+            server = random.choice(servers)
+
+            config_file = "{}.ovpn".format(
+                "-".join([server['countryCode'], server['hostname'].split('.')[0]]).lower())
+
+        else:
+            config_file = "{}.ovpn".format(arguments['server'].lower())
+
+        command = ['openvpn', '--config', os.path.join(
+            self._services['config']['ovpn.configs.dir'], config_file)]
 
         subprocess.check_call(
             command, cwd=self._services['config']['ovpn.configs.dir'])
@@ -78,16 +85,19 @@ class PingServersCommand(Command):
 
                 response_time = re.search(
                     "time=(.*)", response)
-                print("\033[1m{title} ({host})\033[0m".format(
-                    title=server['title'],
-                    host=server['hostname']))
-                print("  Load: {load}%; Response {ping}".format(
-                    load=server['capacity'],
-                    ping=response_time.group(0)))
+
+                server_name = "{}-{}".format(server['countryCode'].lower(),
+                                             server['hostname'].split('.')[0])
+
+                print("\033[1m{} ({})\033[0m".format(
+                    server['title'],
+                    server_name))
+                print("  Load: {}%; Response {}".format(
+                    server['capacity'],
+                    response_time.group(0)))
+
             except subprocess.CalledProcessError:
                 print("Failed to ping {host}".format(host=server['hostname']))
-
-            exit()
 
 
 class UpdateOvpnConfigs(Command):

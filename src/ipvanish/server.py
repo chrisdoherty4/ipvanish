@@ -11,11 +11,16 @@ class ServerContainer(object):
         with open(server_json_path) as h:
             self._servers_json = json.load(h, encoding="utf-8")
 
+        # TODO: Move code out into the GeoJson class when it's made
+
         # Extract the properties of the geojson
         self._servers = []
         for server in self._servers_json:
             del server['properties']['marker-color']
             del server['properties']['marker-cluster-small']
+            if server['properties']['countryCode'] == "GB":
+                server['properties']["countryCode"] = "UK"
+
             self._servers.append(server['properties'])
 
     def getServers(self, continents=None, countries=None, regions=None, cities=None):
