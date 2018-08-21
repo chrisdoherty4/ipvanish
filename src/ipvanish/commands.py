@@ -9,15 +9,6 @@ import re
 import time
 from .utils import sha256_checksum
 
-"""
-TODO: Create commands:
-    * PingServersCommand
-    * WriteConfigCommand
-    * ShowServerStatusCommand
-    * ListServerCapacitiesCommand
-    *
-"""
-
 
 class Command(object):
     """
