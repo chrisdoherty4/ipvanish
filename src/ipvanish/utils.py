@@ -1,4 +1,8 @@
 import hashlib
+import json
+import requests
+import time
+import os
 
 
 class ServiceProvider(dict):
@@ -28,6 +32,59 @@ class ServiceProvider(dict):
     @staticmethod
     def singleton(callback):
         return ServiceProvider._Singleton(callback)
+
+
+class CacheManager(object):
+
+    def __init__(self, config):
+
+        # TODO: Decouple individual cache functions from the CachManager.
+        """
+        The CacheManager doesn't need to know details about caching, just that
+        things need caching and to run them based on keys.
+        """
+        self._config = config
+
+        self._cache_file = os.path.join(
+            self._config['config.dir'], 'cache')
+
+        self._cache = {}
+        self._loaded = False
+
+        self.read(self._cache_file)
+
+    def loaded(self):
+        return self._loaded
+
+    def read(self, path):
+        if os.path.exists(path):
+            with open(path) as h:
+                self._cache = json.loads(h.read())
+                self._loaded = True
+
+    def write(self, path):
+        with open(path, 'w') as h:
+            h.write(json.dumps(self._cache))
+
+    def save(self, key, value):
+        self._cache[key] = value
+        self.write(self._cache_file)
+
+    def get(self, key):
+        if not self._loaded:
+            raise RuntimeError(
+                "Tried accessing cache value before cache file loaded")
+
+        return self._cache[key]
+
+    def updateGeoJson(self):
+        response = requests.get(
+            self._config['geojson.url'], allow_redirects=True)
+
+        with open(self._config['geojson.cache'], 'w') as h:
+            h.write(response.content)
+
+        self.update('geojson', int(time.time()))
 
 
 def sha256_checksum(filename, block_size=65536):
