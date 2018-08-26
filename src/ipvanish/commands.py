@@ -2,12 +2,7 @@ import subprocess
 import json
 import os
 import random
-import requests
-import shutil
-import zipfile
 import re
-import time
-from .utils import sha256_checksum
 
 
 class Command(object):
@@ -97,14 +92,16 @@ class PingServers(Command):
 
 class UpdateGeoJson(Command):
     def execute(self, arguments):
+        print("Updating geojson ...")
         self._services['geojson'].update()
         print("IPVanish GeoJson updated")
 
 
 class UpdateOvpnConfigs(Command):
     def execute(self, arguments):
+        print("Updating configs ...")
         self._services['ovpnconfigs'].update()
-        print("Open VPN configs updated")
+        print("Open VPN configs updated.")
 
 
 class ListContinents(Command):

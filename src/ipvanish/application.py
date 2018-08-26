@@ -10,7 +10,7 @@ from commands import (ListContinents,
 from .server import ServerContainer
 from .utils import ServiceProvider, CacheManager
 from .config import config
-from .models import GeoJson, OvpnConfigs
+from .model import GeoJson, OvpnConfigs
 
 
 class Vanish(object):
@@ -53,6 +53,9 @@ class Vanish(object):
         self._commands['update-configs'] = lambda: UpdateOvpnConfigs(
             self._services)
 
+        self._commands['update-servers'] = lambda: UpdateGeoJson(
+            self._services)
+
         self._commands['ping'] = lambda: PingServers(self._services)
 
     def _setupServices(self):
@@ -63,18 +66,18 @@ class Vanish(object):
 
         self._services['servers'] = ServiceProvider.singleton(
             lambda: ServerContainer(
-                self._services['config']['geojson.cache']
+                self._services['config']['geojson.cache.path']
                 )
             )
 
         self._services['ovpnconfigs'] = lambda: OvpnConfigs(
             self._services['config']['ovpnconfigs.url'],
-            self._services['config']['ovpnconfigs.cahce.path'],
-            self._serivces['cache']
+            self._services['config']['ovpnconfigs.cache.path'],
+            self._services['cache']
             )
 
         self._services['geojson'] = lambda: GeoJson(
             self._services['config']['geojson.url'],
             self._services['config']['geojson.cache.path'],
-            self._serivces['cache']
+            self._services['cache']
             )

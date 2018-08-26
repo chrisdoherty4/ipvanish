@@ -20,6 +20,7 @@ class ConsoleApplication(object):
         self._addList()
         self._addConnect()
         self._addConfigsUpdate()
+        self._addServerUpdate()
         self._addPingServer()
 
     def run(self, args=None):
@@ -45,6 +46,10 @@ class ConsoleApplication(object):
     def _addConfigsUpdate(self):
         self._command_parser.add_parser(
             'update-configs', help="Update the OpenVPN configuration files.")
+
+    def _addServerUpdate(self):
+        self._command_parser.add_parser(
+            'update-servers', help="Update server listing information.")
 
     def _addConnect(self):
         connect_parser = self._command_parser.add_parser(

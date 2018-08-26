@@ -4,6 +4,7 @@ import os
 import tempfile
 import zipfile
 import re
+import shutil
 
 
 class GeoJson(object):
@@ -19,7 +20,7 @@ class GeoJson(object):
         with open(self._cache_path, 'w') as h:
             h.write(response.content)
 
-        self.update('geojson', int(time.time()))
+        self._cache.save('geojson', int(time.time()))
 
 
 class OvpnConfigs(object):
@@ -28,11 +29,11 @@ class OvpnConfigs(object):
         self._path = path
         self._cache = cache
 
-        if not os.path.exists(path):
-            os.makedirs(path)
-
     def update(self):
         working_dir = tempfile.mkdtemp()
+
+        if os.path.exists(self._path):
+            shutil.rmtree(self._path)
 
         response = requests.get(self._url)
 
@@ -57,4 +58,6 @@ class OvpnConfigs(object):
                     os.path.join(self._path, dest)
                     )
 
-        self._cache.update('ovpn.configs', time.time())
+        shutil.rmtree(working_dir)
+
+        self._cache.save('ovpnconfigs', time.time())
