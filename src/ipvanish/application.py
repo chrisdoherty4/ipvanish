@@ -1,14 +1,16 @@
-from commands import (ListContinentsCommand,
-                      ListCountriesCommand,
-                      ListRegionsCommand,
-                      ListCitiesCommand,
-                      ListServersCommand,
-                      ConnectCommand,
+from commands import (ListContinents,
+                      ListCountries,
+                      ListRegions,
+                      ListCities,
+                      ListServers,
+                      Connect,
                       UpdateOvpnConfigs,
-                      PingServersCommand)
+                      UpdateGeoJson,
+                      PingServers)
 from .server import ServerContainer
 from .utils import ServiceProvider, CacheManager
 from .config import config
+from .models import GeoJson, OvpnConfigs
 
 
 class Vanish(object):
@@ -34,23 +36,24 @@ class Vanish(object):
                 "No command could be found to execute for '{}'".format(command))
 
     def _setupCommands(self):
-        self._commands['list.continents'] = lambda: ListContinentsCommand(
-            self._services)
-        self._commands['list.countries'] = lambda: ListCountriesCommand(
-            self._services)
-        self._commands['list.regions'] = lambda: ListRegionsCommand(
-            self._services)
-        self._commands['list.cities'] = lambda: ListCitiesCommand(
-            self._services)
-        self._commands['list.servers'] = lambda: ListServersCommand(
+        self._commands['list.continents'] = lambda: ListContinents(
             self._services)
 
-        self._commands['connect'] = lambda: ConnectCommand(self._services)
+        self._commands['list.countries'] = lambda: ListCountries(
+            self._services)
+
+        self._commands['list.regions'] = lambda: ListRegions(self._services)
+
+        self._commands['list.cities'] = lambda: ListCities(self._services)
+
+        self._commands['list.servers'] = lambda: ListServers(self._services)
+
+        self._commands['connect'] = lambda: Connect(self._services)
 
         self._commands['update-configs'] = lambda: UpdateOvpnConfigs(
             self._services)
 
-        self._commands['ping'] = lambda: PingServersCommand(self._services)
+        self._commands['ping'] = lambda: PingServers(self._services)
 
     def _setupServices(self):
         self._services['config'] = lambda: config
@@ -62,4 +65,16 @@ class Vanish(object):
             lambda: ServerContainer(
                 self._services['config']['geojson.cache']
                 )
+            )
+
+        self._services['ovpnconfigs'] = lambda: OvpnConfigs(
+            self._services['config']['ovpnconfigs.url'],
+            self._services['config']['ovpnconfigs.cahce.path'],
+            self._serivces['cache']
+            )
+
+        self._services['geojson'] = lambda: GeoJson(
+            self._services['config']['geojson.url'],
+            self._services['config']['geojson.cache.path'],
+            self._serivces['cache']
             )

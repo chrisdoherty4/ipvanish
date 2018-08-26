@@ -37,8 +37,6 @@ class ServiceProvider(dict):
 class CacheManager(object):
 
     def __init__(self, config):
-
-        # TODO: Decouple individual cache functions from the CachManager.
         """
         The CacheManager doesn't need to know details about caching, just that
         things need caching and to run them based on keys.
@@ -51,12 +49,12 @@ class CacheManager(object):
         self._cache = {}
         self._loaded = False
 
-        self.read(self._cache_file)
+        self.load(self._cache_file)
 
     def loaded(self):
         return self._loaded
 
-    def read(self, path):
+    def load(self, path):
         if os.path.exists(path):
             with open(path) as h:
                 self._cache = json.loads(h.read())
@@ -76,15 +74,6 @@ class CacheManager(object):
                 "Tried accessing cache value before cache file loaded")
 
         return self._cache[key]
-
-    def updateGeoJson(self):
-        response = requests.get(
-            self._config['geojson.url'], allow_redirects=True)
-
-        with open(self._config['geojson.cache'], 'w') as h:
-            h.write(response.content)
-
-        self.update('geojson', int(time.time()))
 
 
 def sha256_checksum(filename, block_size=65536):

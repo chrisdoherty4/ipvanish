@@ -26,7 +26,7 @@ class Command(object):
         raise NotImplementedError()
 
 
-class ConnectCommand(Command):
+class Connect(Command):
     """
     Command to connect to the VPN server.
     """
@@ -63,7 +63,7 @@ class ConnectCommand(Command):
             command, cwd=self._services['config']['ovpn.configs.dir'])
 
 
-class PingServersCommand(Command):
+class PingServers(Command):
     def execute(self, arguments):
         servers = self._services['servers'].getServers(
             continents=arguments['continents'],
@@ -95,56 +95,19 @@ class PingServersCommand(Command):
                 print("Failed to ping {host}".format(host=server['hostname']))
 
 
-class UpdateOvpnConfigs(Command):
-    """
-    Updates the ovpn configurations with the latest from IPVanish.
-    """
-
+class UpdateGeoJson(Command):
     def execute(self, arguments):
-        response = requests.get(self._services['config']['ovpn.configs.url'])
-
-        configs_zip = os.path.join(
-            self._services['config']['config.dir'], 'configs.zip')
-        configs_zip_prev = os.path.join(
-            self._services['config']['config.dir'], 'configs.zip.prev')
-
-        with open(configs_zip, 'w') as h:
-            h.write(response.content)
-
-        # If there is no previous configs zip, or the previous config zip exists
-        # and the sha sums between the latest and old are different update
-        # the configs.
-        if ((os.path.exists(configs_zip_prev)
-                and sha256_checksum(configs_zip) != sha256_checksum(configs_zip_prev))
-                or not os.path.exists(configs_zip_prev)):
-            shutil.rmtree(self._services['config']['ovpn.configs.dir'])
-
-            with zipfile.ZipFile(configs_zip, 'r') as zip:
-                zip.extractall(self._services['config']['ovpn.configs.dir'])
-
-            os.rename(configs_zip, configs_zip_prev)
-
-            for file in os.listdir(self._services['config']['ovpn.configs.dir']):
-                if "ovpn" in file:
-                    parts = re.search(
-                        '^ipvanish-([A-Z]{2})-.+-([a-z]{3}-[a-c]{1}[0-9]{2}.ovpn)$',
-                        file
-                        )
-                    dest = "-".join([parts.group(1), parts.group(2)]).lower()
-
-                    os.rename(
-                        os.path.join(
-                            self._services['config']['ovpn.configs.dir'], file),
-                        os.path.join(
-                            self._services['config']['ovpn.configs.dir'], dest)
-                        )
-
-            self._services['cache'].save('ovpn.configs', time.time())
-        else:
-            os.remove(configs_zip)
+        self._services['geojson'].update()
+        print("IPVanish GeoJson updated")
 
 
-class ListContinentsCommand(Command):
+class UpdateOvpnConfigs(Command):
+    def execute(self, arguments):
+        self._services['ovpnconfigs'].update()
+        print("Open VPN configs updated")
+
+
+class ListContinents(Command):
     """
     List continents command
     """
@@ -155,7 +118,7 @@ class ListContinentsCommand(Command):
         print(json.dumps(continents, indent=4, sort_keys=True))
 
 
-class ListCountriesCommand(Command):
+class ListCountries(Command):
     """
     List countries command
     """
@@ -169,7 +132,7 @@ class ListCountriesCommand(Command):
         print(json.dumps(countries, indent=4, sort_keys=True))
 
 
-class ListRegionsCommand(Command):
+class ListRegions(Command):
     """
     List regions command
     """
@@ -184,7 +147,7 @@ class ListRegionsCommand(Command):
         print(json.dumps(regions, indent=4, sort_keys=True))
 
 
-class ListCitiesCommand(Command):
+class ListCities(Command):
     """
     List cities command
     """
@@ -200,7 +163,7 @@ class ListCitiesCommand(Command):
         print(json.dumps(list(cities), indent=4, sort_keys=True))
 
 
-class ListServersCommand(Command):
+class ListServers(Command):
     """
     List cities command
     """
