@@ -1,7 +1,5 @@
 import hashlib
 import json
-import requests
-import time
 import os
 
 
