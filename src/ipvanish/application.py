@@ -7,10 +7,9 @@ from commands import (ListContinents,
                       UpdateOvpnConfigs,
                       UpdateGeoJson,
                       PingServers)
-from .server import ServerContainer
 from .utils import ServiceProvider, CacheManager
 from .config import config
-from .model import GeoJson, OvpnConfigs
+from .model import GeoJson, OvpnConfigs, ServerContainer
 
 
 class Vanish(object):
