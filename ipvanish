@@ -2,6 +2,8 @@
 from vanish.application import Vanish
 from argparse import ArgumentParser, RawTextHelpFormatter
 
+# TODO: Move this to a more approriate module.
+
 
 class ConsoleApplication(object):
     """
