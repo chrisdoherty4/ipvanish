@@ -34,17 +34,12 @@ class ServiceProvider(dict):
 
 class CacheManager(object):
 
-    def __init__(self, config):
-        # TODO: Change `config` to just be a path tot eh cache file.
-        """
-        The CacheManager doesn't need to know details about caching, just that
-        things need caching and to run them based on keys.
-        """
-        self._config = config
+    def __init__(self, cache_file):
+        """A manager for caching arbirary data.
 
-        self._cache_file = os.path.join(
-            self._config['config.dir'], 'cache')
-
+        :param cache_file: Path to the file we should use for caching.
+        """
+        self._cache_file = cache_file
         self._cache = {}
         self._loaded = False
 
