@@ -4,8 +4,8 @@
 1. Intelligently detect a server to connect to based on filtering.
 1. Disallow 'connect' command with no filters applied.
 1. Controlling the openvpn output including taking username and password on command line.
-1. Improve "non-scenario" support so commands cannot be invoked without the minimum number of arguments.
 1. Improve region possibilities (there are some "fake" regions that need removing)
 1. Make filters case insensitive.
 1. Improve the output of `list` commands so it's more userfriendly.
 2. Move the ConsoleApplication out of ipvanish executable and into a more appropriate module.
+1. Update README.md to be a proper README

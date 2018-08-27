@@ -26,6 +26,12 @@ class GeoJson(object):
 
 class OvpnConfigs(object):
     def __init__(self, url, path, cache):
+        """Consructor.
+
+        :param url: URL ovpn configs zip file.
+        :param path: Path to write ovpn configs.
+        :param cache: A CacheManager instance.
+        """
         self._url = url
         self._path = path
         self._cache = cache
