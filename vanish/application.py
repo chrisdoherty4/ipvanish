@@ -61,7 +61,7 @@ class Vanish(object):
         self._services['config'] = lambda: config
 
         self._services['cache'] = ServiceProvider.singleton(
-            lambda: CacheManager(self._services['config']))
+            lambda: CacheManager(self._services['config']['cache.path']))
 
         self._services['servers'] = ServiceProvider.singleton(
             lambda: ServerContainer(

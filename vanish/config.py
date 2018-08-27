@@ -16,6 +16,11 @@ config["config.dir"] = os.path.abspath(
         )
     )
 
+"""
+Path to the cache file where arbitrary data is cached.
+"""
+config["cache.path"] = os.path.join(config['config.dir'], "cache")
+
 
 """ GEOJSON """
 
