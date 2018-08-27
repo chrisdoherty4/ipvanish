@@ -9,3 +9,5 @@
 1. Improve the output of `list` commands so it's more userfriendly.
 2. Move the ConsoleApplication out of ipvanish executable and into a more appropriate module.
 1. Update README.md to be a proper README
+1. Document all classes and functions properly
+1. Set up travis ci.
