@@ -1,12 +1,12 @@
-from commands import (ListContinents,
-                      ListCountries,
-                      ListRegions,
-                      ListCities,
-                      ListServers,
-                      Connect,
-                      UpdateOvpnConfigs,
-                      UpdateGeoJson,
-                      PingServers)
+from .commands import (ListContinents,
+                       ListCountries,
+                       ListRegions,
+                       ListCities,
+                       ListServers,
+                       Connect,
+                       UpdateOvpnConfigs,
+                       UpdateGeoJson,
+                       PingServers)
 from .utils import ServiceProvider, CacheManager
 from .config import config
 from .model import GeoJson, OvpnConfigs, ServerContainer

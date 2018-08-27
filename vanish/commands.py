@@ -3,6 +3,7 @@ import json
 import os
 import random
 import re
+import tabulate
 
 
 class Command(object):
@@ -42,7 +43,10 @@ class Connect(Command):
             server = random.choice(servers)
 
             config_file = "{}.ovpn".format(
-                "-".join([server['countryCode'], server['hostname'].split('.')[0]]).lower())
+                "-".join([
+                    server['countryCode'],
+                    server['hostname'].split('.')[0]])
+                .lower())
 
         else:
             config_file = "{}.ovpn".format(arguments['server'].lower())
@@ -68,26 +72,33 @@ class PingServers(Command):
 
         print("Pinging servers ...")
 
+        table = []
+
         for server in servers:
             try:
                 response = subprocess.check_output(
                     ['ping', '-c', '1', '-W', '1', server['ip']])
 
                 response_time = re.search(
-                    "time=(.*)", response)
+                    "(?<=time=)([\d\.]+)", response.decode('utf-8'))
 
-                server_name = "{}-{}".format(server['countryCode'].lower(),
-                                             server['hostname'].split('.')[0])
+                server_handle = "{}-{}".format(server['countryCode'].lower(),
+                                               server['hostname'].split('.')[0])
 
-                print("\033[1m{} ({})\033[0m".format(
+                table.append([
                     server['title'],
-                    server_name))
-                print("  Load: {}%; Response {}".format(
-                    server['capacity'],
-                    response_time.group(0)))
+                    server_handle,
+                    str(server['capacity']) + "%",
+                    response_time.group(0) + " ms"
+                    ])
 
             except subprocess.CalledProcessError:
                 print("Failed to ping {host}".format(host=server['hostname']))
+
+        print(tabulate.tabulate(
+            sorted(table),
+            headers=["Location", "Handle", "Load", "Response"],
+            tablefmt="fancy_grid"))
 
 
 class UpdateGeoJson(Command):
@@ -112,7 +123,13 @@ class ListContinents(Command):
     def execute(self, arguments):
         continents = self._services['servers'].getContinents()
 
-        print(json.dumps(continents, indent=4, sort_keys=True))
+        headers = ['Code', 'Name']
+
+        print(tabulate.tabulate(
+            sorted(continents.items()),
+            headers=headers,
+            tablefmt="fancy_grid"
+            ))
 
 
 class ListCountries(Command):
@@ -126,7 +143,13 @@ class ListCountries(Command):
         countries = self._services['servers'].getCountries(
             continents=continents)
 
-        print(json.dumps(countries, indent=4, sort_keys=True))
+        headers = ['Code', 'Name']
+
+        print(tabulate.tabulate(
+            sorted(countries.items()),
+            headers=headers,
+            tablefmt="fancy_grid"
+            ))
 
 
 class ListRegions(Command):
@@ -141,7 +164,13 @@ class ListRegions(Command):
         regions = self._services['servers'].getRegions(
             continents=continents, countries=countries)
 
-        print(json.dumps(regions, indent=4, sort_keys=True))
+        headers = ['Code', 'Name']
+
+        print(tabulate.tabulate(
+            sorted(regions.items()),
+            headers=headers,
+            tablefmt="fancy_grid"
+            ))
 
 
 class ListCities(Command):
@@ -157,7 +186,15 @@ class ListCities(Command):
         cities = self._services['servers'].getCities(
             continents=continents, countries=countries, regions=regions)
 
-        print(json.dumps(list(cities), indent=4, sort_keys=True))
+        headers = ['Name']
+
+        cities_data = [[c] for c in cities]
+
+        print(tabulate.tabulate(
+            sorted(cities_data),
+            headers=headers,
+            tablefmt="fancy_grid"
+            ))
 
 
 class ListServers(Command):
@@ -178,4 +215,5 @@ class ListServers(Command):
             cities=cities
             )
 
+        # TODO: Update to print out a table.
         print(json.dumps(list(servers), indent=4, sort_keys=True))
