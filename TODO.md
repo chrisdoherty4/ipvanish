@@ -11,3 +11,4 @@
 1. Update README.md to be a proper README
 1. Document all classes and functions properly
 1. Set up travis ci.
+1. Add a Server object for use with ServerContainer
