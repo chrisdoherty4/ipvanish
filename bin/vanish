@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-from vanish.application import Vanish
+import sys
+import os
+
+try:
+    from vanish.application import Vanish
+except ModuleNotFoundError:
+    # TODO: Fix this
+    sys.path.append(os.path.abspath(os.path.join('.')))
+    from vanish.application import Vanish
+
 from argparse import ArgumentParser, RawTextHelpFormatter
 
 # TODO: Move this to a more approriate module.
