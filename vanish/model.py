@@ -16,10 +16,10 @@ class GeoJson(object):
 
     def update(self):
         # TODO: Consider adding in a configurable geojson cache timeout
-        response = requests.get(self._url, allow_redirects=True)
+        response = requests.get(self._url, allow_redirects=True).json()
 
         with open(self._cache_path, 'w') as h:
-            h.write(str(response.content))
+            json.dump(response, indent=4)
 
         self._cache.save('geojson', int(time.time()))
 
@@ -77,8 +77,8 @@ class ServerContainer(object):
 
     def __init__(self, server_json_path):
 
-        with open(server_json_path) as h:
-            self._servers_json = json.load(h, encoding="utf-8")
+        with open(server_json_path, 'r') as h:
+            self._servers_json = json.load(h)
 
         # TODO: Move code out into the GeoJson class when it's made
 

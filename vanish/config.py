@@ -48,10 +48,16 @@ config['geojson.cache.timeout'] = 30
 URL to IPVanish ovpn configuration files. This is a zip containing .ovpn files
 and the necessary certificate file to connect to IPVanish servers.
 """
-config["ovpnconfigs.url"] = "https://www.ipvanish.com/software/configs/configs.zip"
+config["ovpn.configs.url"] = "https://www.ipvanish.com/software/configs/configs.zip"
 
 """
 The location the ovpn configuration files will be stored.
 """
-config["ovpnconfigs.cache.path"] = os.path.join(
+config["ovpn.configs.path"] = os.path.join(
     config['config.dir'], 'openvpn')
+
+"""
+The IPVanish cert file
+"""
+config["ovpn.cert"] = os.path.join(
+    config['ovpn.configs.path'], 'ca.ipvanish.com.crt')

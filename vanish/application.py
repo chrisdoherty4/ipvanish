@@ -70,8 +70,8 @@ class Vanish(object):
                 )
 
         self._services['ovpnconfigs'] = lambda: OvpnConfigs(
-            self._services['config']['ovpnconfigs.url'],
-            self._services['config']['ovpnconfigs.cache.path'],
+            self._services['config']['ovpn.configs.url'],
+            self._services['config']['ovpn.configs.path'],
             self._services['cache']
             )
 
