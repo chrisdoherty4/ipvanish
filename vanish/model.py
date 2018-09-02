@@ -19,7 +19,7 @@ class GeoJson(object):
         response = requests.get(self._url, allow_redirects=True)
 
         with open(self._cache_path, 'w') as h:
-            h.write(response.content)
+            h.write(str(response.content))
 
         self._cache.save('geojson', int(time.time()))
 
