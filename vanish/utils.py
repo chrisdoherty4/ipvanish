@@ -6,10 +6,14 @@ import os
 class ServiceProvider(dict):
     # TODO: Comment class
     class _Singleton(object):
-        def __init__(self, callback):
-            self._instance = callback()
+        def __init__(self, callable):
+            self._instance = None
+            self._callable = callable
 
         def __call__(self):
+            if not self._instance:
+                self._instance = self._callable()
+
             return self._instance
 
     def __init__(self, *args, **kwargs):

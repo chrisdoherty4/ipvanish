@@ -65,9 +65,9 @@ class Vanish(object):
 
         self._services['servers'] = ServiceProvider.singleton(
             lambda: ServerContainer(
-                self._services['config']['geojson.cache.path']
+                    self._services['config']['geojson.cache.path']
+                    )
                 )
-            )
 
         self._services['ovpnconfigs'] = lambda: OvpnConfigs(
             self._services['config']['ovpnconfigs.url'],
