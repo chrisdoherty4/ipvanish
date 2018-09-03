@@ -28,9 +28,6 @@ class Connect(Command):
     """
 
     def execute(self, arguments):
-        # TODO: Intelligently select server
-        # TODO: Force a GeoJson update.
-
         if not arguments['server']:
             # TODO: Intelligently select a server
             servers = self._services['servers'].getServers(
@@ -57,15 +54,19 @@ class Connect(Command):
                 self._services['config']['ovpn.configs.path'],
                 config_file
                 ),
-            '--cert', self._servces['config']['ovpn.cert']
+            '--ca', self._services['config']['ovpn.cert']
             ]
 
-        if arguments['auth_user_pass']:
-            command.extend(['--auth-user-pass', os.path.abspath(os.path.join(
-                os.getcwd(), arguments['auth_user_pass']))])
+        if arguments['bucket']:
+            command.extend(arguments['bucket'])
 
-        subprocess.check_call(
-            command, cwd=self._services['config']['ovpn.configs.dir'])
+        try:
+            subprocess.check_call(command)
+        except subprocess.CalledProcessError:
+            print("Failed to run openvpn command:")
+            print("\t" + " ".join(command))
+        except KeyboardInterrupt:
+            print("Disconnected")
 
 
 class PingServers(Command):
@@ -224,7 +225,7 @@ class ListServers(Command):
         headers = ['Continent', 'Country', 'Region', 'City', 'Server']
 
         server_data = [
-            (s['continent'], s['country'], s['region'],
+            (s['continent'], s['country'], s['regionq'],
              s['city'], s['hostname'].split(".")[0])
             for s in servers
             ]

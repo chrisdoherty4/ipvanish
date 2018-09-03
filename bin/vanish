@@ -75,9 +75,9 @@ class ConsoleApplication(object):
             )
 
         connect_parser.add_argument(
-            '--auth-user-pass',
+            'bucket',
             default=None,
-            help="A credentials file with username and password for openvpn"
+            nargs="*"
             )
 
         filter_group = connect_parser.add_argument_group('filters')

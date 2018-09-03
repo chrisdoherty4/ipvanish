@@ -119,7 +119,7 @@ class ServerContainer(object):
         if cities:
             servers = self._filterCities(servers, cities)
 
-        return servers
+        return list(servers)
 
     def getContinents(self):
         '''
