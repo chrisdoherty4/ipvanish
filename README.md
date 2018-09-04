@@ -1,4 +1,4 @@
-# Vanish
+# Vanish [![Build Status](https://travis-ci.org/chrisdoherty4/vanish.svg?branch=master)](https://travis-ci.org/chrisdoherty4/vanish)
 
 Vanish is an installable python application that interacts with the IPVanish servers. It can
 grab the latest server configurations and intelligently detect what servers to connec to
