@@ -1,7 +1,7 @@
 from setuptools import setup
 from codecs import open
 from os import path
-from __version__ import VERSION
+from vanish.__version__ import VERSION
 
 here = path.abspath(path.dirname(__file__))
 

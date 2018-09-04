@@ -7,7 +7,8 @@ from .commands import (ListContinents,
                        Connect,
                        UpdateOvpnConfigs,
                        UpdateGeoJson,
-                       PingServers)
+                       PingServers,
+                       Version)
 from .utils import ServiceProvider, CacheManager
 from .config import config
 from .model import GeoJson, OvpnConfigs, ServerContainer
@@ -68,6 +69,8 @@ class Vanish(object):
 
         self._commands['ping'] = lambda: PingServers(self._services)
 
+        self._commands['version'] = lambda: Version(self._services)
+
     def _setupServices(self):
         self._services['config'] = lambda: config
 
@@ -112,9 +115,15 @@ class _Args(object):
         self._addConfigsUpdate()
         self._addServerUpdate()
         self._addPingServer()
+        self._addVersion()
 
     def run(self, args=None):
         return vars(self._parser.parse_args(args))
+
+    def _addVersion(self):
+        self._command_parser.add_parser(
+            'version'
+            )
 
     def _addPingServer(self):
         ping = self._command_parser.add_parser(

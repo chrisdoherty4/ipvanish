@@ -1,6 +1,7 @@
 import os
 import tabulate
 from .model import Vanish
+from .__version__ import VERSION
 
 
 class Command(object):
@@ -17,6 +18,11 @@ class Command(object):
 
     def execute(self, arguments):
         raise NotImplementedError()
+
+
+class Version(Command):
+    def execute(self, arguments):
+        print("Vanish version {}".format(VERSION))
 
 
 class Connect(Command):
