@@ -9,7 +9,8 @@ from .. import model, utils
 class TestGeoJson(unittest.TestCase):
     def setUp(self):
         self.working_dir = tempfile.mkdtemp()
-        self.cache = utils.CacheManager({'config.dir': self.working_dir})
+        self.cache = utils.CacheManager(
+            os.path.join(self.working_dir, 'cache'))
         self.geojson_file = os.path.join(self.working_dir, 'geojson')
 
     def tearDown(self):
@@ -46,7 +47,8 @@ class TestGeoJson(unittest.TestCase):
 class TestOvpnConfig(unittest.TestCase):
     def setUp(self):
         self.working_dir = tempfile.mkdtemp()
-        self.cache = utils.CacheManager({'config.dir': self.working_dir})
+        self.cache = utils.CacheManager(
+            os.path.join(self.working_dir, 'cache'))
         self.config_path = os.path.join(self.working_dir, 'ovpn')
 
         os.makedirs(self.config_path)
@@ -63,7 +65,8 @@ class TestOvpnConfig(unittest.TestCase):
 
         ovpn.update()
 
-        self.assertGreater(os.listdir(self.config_path), 0, "No files unzipped")
+        self.assertGreater(len(os.listdir(self.config_path)),
+                           0, "No files unzipped")
 
 # TODO: Write tests for ServerContainer onece it's refactored.
 # Intention is to rework it so it does have to worry about exact geojson format

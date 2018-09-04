@@ -1,5 +1,6 @@
 import unittest
-import test_model
+from . import test_model
+
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()

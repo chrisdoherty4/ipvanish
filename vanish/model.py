@@ -60,7 +60,7 @@ class OvpnConfigs(object):
 
         new_configs = os.path.join(working_dir, 'configs.zip')
 
-        with open(new_configs, 'w') as h:
+        with open(new_configs, 'wb') as h:
             h.write(response.content)
 
         with zipfile.ZipFile(new_configs, 'r') as zip:
