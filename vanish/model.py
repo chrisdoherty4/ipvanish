@@ -6,6 +6,7 @@ import zipfile
 import re
 import shutil
 import json
+import subprocess
 
 
 class GeoJson(object):
@@ -18,8 +19,20 @@ class GeoJson(object):
         # TODO: Consider adding in a configurable geojson cache timeout
         response = requests.get(self._url, allow_redirects=True).json()
 
+        # TODO: Move code out into the GeoJson class when it's made
+
+        # Extract the properties of the geojson
+        servers = []
+        for server in response:
+            del server['properties']['marker-color']
+            del server['properties']['marker-cluster-small']
+            if server['properties']['countryCode'] == "GB":
+                server['properties']["countryCode"] = "UK"
+
+            servers.append(server['properties'])
+
         with open(self._cache_path, 'w') as h:
-            json.dump(response, indent=4)
+            json.dump(servers, h, indent=4)
 
         self._cache.save('geojson', int(time.time()))
 
@@ -70,27 +83,38 @@ class OvpnConfigs(object):
         self._cache.save('ovpnconfigs', time.time())
 
 
+class Vanish(object):
+    @staticmethod
+    def connect(config_file, ca_file, *kargs):
+        command = [
+            'openvpn',
+            '--config', config_file,
+            '--ca', ca_file
+            ]
+
+        command.extend(kargs)
+
+        try:
+            print(command)
+            exit()
+            subprocess.check_call(command)
+        except subprocess.CalledProcessError:
+            print("Failed to run openvpn command:")
+            print("\t" + " ".join(command))
+        except KeyboardInterrupt:
+            print("Disconnected")
+
+
 class ServerContainer(object):
     '''
     A container that wraps server information and is queryable.
     '''
 
     def __init__(self, server_json_path):
-
+        """Constructor.
+        """
         with open(server_json_path, 'r') as h:
-            self._servers_json = json.load(h)
-
-        # TODO: Move code out into the GeoJson class when it's made
-
-        # Extract the properties of the geojson
-        self._servers = []
-        for server in self._servers_json:
-            del server['properties']['marker-color']
-            del server['properties']['marker-cluster-small']
-            if server['properties']['countryCode'] == "GB":
-                server['properties']["countryCode"] = "UK"
-
-            self._servers.append(server['properties'])
+            self._servers = json.load(h)
 
     def getServers(self, continents=None, countries=None, regions=None, cities=None):
         '''

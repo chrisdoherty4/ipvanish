@@ -1,9 +1,9 @@
 import subprocess
-import json
 import os
 import random
 import re
 import tabulate
+from .model import Vanish
 
 
 class Command(object):
@@ -37,6 +37,10 @@ class Connect(Command):
                 cities=arguments['cities']
                 )
 
+            if not servers:
+                print("No servers available with current filters")
+                exit()
+
             server = random.choice(servers)
 
             config_file = "{}.ovpn".format(
@@ -44,29 +48,16 @@ class Connect(Command):
                     server['countryCode'],
                     server['hostname'].split('.')[0]])
                 .lower())
-
         else:
             config_file = "{}.ovpn".format(arguments['server'].lower())
 
-        command = [
-            'openvpn',
-            '--config', os.path.join(
+        Vanish.connect(
+            os.path.join(
                 self._services['config']['ovpn.configs.path'],
-                config_file
-                ),
-            '--ca', self._services['config']['ovpn.cert']
-            ]
-
-        if arguments['bucket']:
-            command.extend(arguments['bucket'])
-
-        try:
-            subprocess.check_call(command)
-        except subprocess.CalledProcessError:
-            print("Failed to run openvpn command:")
-            print("\t" + " ".join(command))
-        except KeyboardInterrupt:
-            print("Disconnected")
+                config_file),
+            self._services['config']['ovpn.cert'],
+            *(arguments['bucket'])
+            )
 
 
 class PingServers(Command):
@@ -225,7 +216,7 @@ class ListServers(Command):
         headers = ['Continent', 'Country', 'Region', 'City', 'Server']
 
         server_data = [
-            (s['continent'], s['country'], s['regionq'],
+            (s['continent'], s['country'], s['region'],
              s['city'], s['hostname'].split(".")[0])
             for s in servers
             ]
