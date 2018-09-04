@@ -1,7 +1,4 @@
-import subprocess
 import os
-import random
-import re
 import tabulate
 from .model import Vanish
 
