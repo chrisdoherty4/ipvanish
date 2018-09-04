@@ -29,7 +29,7 @@ class Connect(Command):
 
     def execute(self, arguments):
         if not arguments['server']:
-            # TODO: Intelligently select a server
+            print("Selecting a server ...")
             servers = self._services['servers'].getServers(
                 continents=arguments['continents'],
                 countries=arguments['countries'],
@@ -41,7 +41,10 @@ class Connect(Command):
                 print("No servers available with current filters")
                 exit()
 
-            server = random.choice(servers)
+            servers = sorted(servers, key=lambda x: x['capacity'])
+            servers = Vanish.ping(servers[:20])
+            servers = sorted(servers, key=lambda x: x['rtt'])
+            server = servers[0]
 
             config_file = "{}.ovpn".format(
                 "-".join([
@@ -50,6 +53,13 @@ class Connect(Command):
                 .lower())
         else:
             config_file = "{}.ovpn".format(arguments['server'].lower())
+
+        print("Selected {} ({}); Capacity {}%; Ping {}ms".format(
+            server['title'],
+            server['hostname'],
+            server['capacity'],
+            server['rtt']
+            ))
 
         Vanish.connect(
             os.path.join(
@@ -70,28 +80,19 @@ class PingServers(Command):
 
         print("Pinging servers ...")
 
+        servers = Vanish.ping(servers)
+
         table = []
-
         for server in servers:
-            try:
-                response = subprocess.check_output(
-                    ['ping', '-c', '1', '-W', '1', server['ip']])
+            server_handle = "{}-{}".format(server['countryCode'].lower(),
+                                           server['hostname'].split('.')[0])
 
-                response_time = re.search(
-                    "(?<=time=)([\d\.]+)", response.decode('utf-8'))
-
-                server_handle = "{}-{}".format(server['countryCode'].lower(),
-                                               server['hostname'].split('.')[0])
-
-                table.append([
-                    server['title'],
-                    server_handle,
-                    str(server['capacity']) + "%",
-                    response_time.group(0) + " ms"
-                    ])
-
-            except subprocess.CalledProcessError:
-                print("Failed to ping {host}".format(host=server['hostname']))
+            table.append([
+                server['title'],
+                server_handle,
+                str(server['capacity']) + "%",
+                str(server['rtt']) + " ms"
+                ])
 
         print(tabulate.tabulate(
             sorted(table),

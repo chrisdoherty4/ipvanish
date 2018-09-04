@@ -7,6 +7,7 @@ import re
 import shutil
 import json
 import subprocess
+import re
 
 
 class GeoJson(object):
@@ -86,6 +87,12 @@ class OvpnConfigs(object):
 class Vanish(object):
     @staticmethod
     def connect(config_file, ca_file, *kargs):
+        """Connect to IPVanishs servers.
+
+        :param config_file: The ovpn configuration file
+        :param ca_file: The certificate file for IPVanishs servers.
+        :param *kargs: Any additional arguments to pass to openvpn command.
+        """
         command = [
             'openvpn',
             '--config', config_file,
@@ -104,6 +111,23 @@ class Vanish(object):
         except KeyboardInterrupt:
             print("Disconnected")
 
+    @staticmethod
+    def ping(servers):
+        for i, server in enumerate(servers):
+            try:
+                response = subprocess.check_output(
+                    ['ping', '-c', '1', '-W', '1', server['ip']])
+
+                response_time = re.search(
+                    "(?<=time=)([\d\.]+)", response.decode('utf-8'))
+
+                servers[i]['rtt'] = float(response_time.group(0))
+
+            except subprocess.CalledProcessError:
+                print("Failed to ping {}".format(server['hostname']))
+
+        return servers
+
 
 class ServerContainer(object):
     '''
@@ -116,7 +140,11 @@ class ServerContainer(object):
         with open(server_json_path, 'r') as h:
             self._servers = json.load(h)
 
-    def getServers(self, continents=None, countries=None, regions=None, cities=None):
+    def getServers(self,
+                   continents=None,
+                   countries=None,
+                   regions=None,
+                   cities=None):
         '''
         Retrieve a list of servers and their associated information.
 
