@@ -102,8 +102,6 @@ class Vanish(object):
         command.extend(kargs)
 
         try:
-            print(command)
-            exit()
             subprocess.check_call(command)
         except subprocess.CalledProcessError:
             print("Failed to run openvpn command:")
