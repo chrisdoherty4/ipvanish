@@ -1,0 +1,12 @@
+sudo: required
+
+language: python
+
+python:
+  - "3.4"
+
+install:
+  - sudo python setup.py install
+
+script:
+  - python3 -m vanish.test.runner
