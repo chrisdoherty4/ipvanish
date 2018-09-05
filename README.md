@@ -2,40 +2,6 @@
 
 Vanish is a command line tool for managing interactions with IPVanish servers.
 
-## Getting Started
-
-If you want to contribute to the project feel free to fork and raise PRs.
-
-### Developing
-
-To get up and running just fork and clone the project locally and install the requirements
-using pip.
-
-```
-pip install -r requirements.txt
-```
-
-## Running the tests
-
-Unit tests are located in the vanish/tests directory. We use the standard `unittest` module shipped with python.
-
-You can add a new test module by creating it under the test directory and making an entry in `runner.py`.
-
-```
-suites = [
-      loader.loadTestsFromModule(test_model)
-      # Add testing modules here
-      ]
-```
-
-### Coding style
-
-We follow the PEP8 standard and the code will be tested against pylint. You can keep no top of styling with a tool such as `autopep8` but pylint will likely highlight further issues.
-
-```
-autopep8 my_module.py
-pylnit my_modyle.py
-```
 
 ## Installing
 
@@ -49,6 +15,71 @@ Having cloned the project you can install it using the setup.py module.
 
 ```
 python setup.py install
+```
+
+### Usage
+
+The tool is easy to use and comes with a help menu describing all available commands. The majority of the commands have a set of location based filters for continent, country, region, and city. The filters accept the relevant name or code that can be retrieved from the `vanish list [continent|country|region|city]` commands.
+
+#### Examples
+##### Listing locations and servers
+```
+vanish list servers --country UK
+
+vanish list continents
+
+vanish list countries --continent EU
+```
+
+##### Pinging servers
+```
+vanish ping --country UK
+
+vanish ping --continent EU
+```
+
+##### Connect to a server
+
+The tool will intelligently decide what server to connect to based on current server load and round-trip time to servers.
+```
+vanish connect --city Manchester
+
+vanish connect --country US
+```
+
+
+## Developing
+
+If you wish to contribute to the project please fork it and raise PRs. You will need to install the requriements from the `requirements.txt` file.
+
+```
+pip install -r requirements.txt
+```
+
+### Running the tests
+
+Unit tests are located in the vanish/tests directory. We use the standard `unittest` module shipped with python.
+
+You can add a new test module by creating it under the test directory and making an entry in `runner.py`.
+
+```
+suites = [
+      loader.loadTestsFromModule(test_model)
+      # Add testing modules here
+      ]
+```
+
+Once you've added your testing module you can invoke the tests with:
+```
+python -m vanish.test.runner
+```
+
+### Coding style
+
+The code should conform to `autopep8` default configuration.
+
+```
+autopep8 -i my_module.py
 ```
 
 ## Versioning
