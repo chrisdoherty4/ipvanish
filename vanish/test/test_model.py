@@ -21,7 +21,7 @@ class TestGeoJson(unittest.TestCase):
             "https://www.ipvanish.com/api/servers.geojson",
             self.geojson_file,
             self.cache
-            )
+        )
 
         current_time = time.time()
 
@@ -38,7 +38,7 @@ class TestGeoJson(unittest.TestCase):
             "https://www.ipvanish.com/api/servers.geojson",
             os.path.join(self.working_dir, "fake", "path"),
             self.cache
-            )
+        )
 
         with self.assertRaises(IOError, msg="Success with invalid write path."):
             geojson.update()
@@ -61,7 +61,7 @@ class TestOvpnConfig(unittest.TestCase):
             "https://www.ipvanish.com/software/configs/configs.zip",
             self.config_path,
             self.cache
-            )
+        )
 
         ovpn.update()
 

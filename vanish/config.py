@@ -13,8 +13,8 @@ The root configuration directory for the application.
 config["config.dir"] = os.path.abspath(
     os.path.expanduser(
         os.path.join('~', '.config', 'vanish')
-        )
     )
+)
 
 """
 Path to the cache file where arbitrary data is cached.

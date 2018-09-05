@@ -79,21 +79,21 @@ class Vanish(object):
 
         self._services['servers'] = ServiceProvider.singleton(
             lambda: ServerContainer(
-                    self._services['config']['geojson.cache.path']
-                    )
-                )
+                self._services['config']['geojson.cache.path']
+            )
+        )
 
         self._services['ovpnconfigs'] = lambda: OvpnConfigs(
             self._services['config']['ovpn.configs.url'],
             self._services['config']['ovpn.configs.path'],
             self._services['cache']
-            )
+        )
 
         self._services['geojson'] = lambda: GeoJson(
             self._services['config']['geojson.url'],
             self._services['config']['geojson.cache.path'],
             self._services['cache']
-            )
+        )
 
 
 class _Args(object):
@@ -123,7 +123,7 @@ class _Args(object):
     def _addVersion(self):
         self._command_parser.add_parser(
             'version'
-            )
+        )
 
     def _addPingServer(self):
         ping = self._command_parser.add_parser(
@@ -144,19 +144,19 @@ class _Args(object):
         connect_parser = self._command_parser.add_parser(
             'connect',
             help='Connect to an IPVanish server'
-            )
+        )
 
         connect_parser.add_argument(
             '--server',
             metavar="SERVER",
             default=None,
-            )
+        )
 
         connect_parser.add_argument(
             'bucket',
             default=None,
             nargs="*"
-            )
+        )
 
         filter_group = connect_parser.add_argument_group('filters')
         self._addAllServerFilters(filter_group)
@@ -165,7 +165,7 @@ class _Args(object):
         list_parser = self._command_parser.add_parser(
             'list',
             help='Retrieve server locations or generate a full server list'
-            )
+        )
 
         list_parser.add_argument(
             'subcommand',
@@ -183,7 +183,7 @@ class _Args(object):
             action='append',
             dest='continents',
             metavar='CONTINENT'
-            )
+        )
 
     def _addCountriesFilter(self, parser):
         parser.add_argument(
@@ -191,7 +191,7 @@ class _Args(object):
             action='append',
             dest='countries',
             metavar='COUNTRY'
-            )
+        )
 
     def _addRegionsFilter(self, parser):
         parser.add_argument(
@@ -199,7 +199,7 @@ class _Args(object):
             action='append',
             dest='regions',
             metavar='REGION'
-            )
+        )
 
     def _addCitiesFilter(self, parser):
         parser.add_argument(
@@ -207,7 +207,7 @@ class _Args(object):
             action='append',
             dest='cities',
             metavar='CITY'
-            )
+        )
 
     def _addAllServerFilters(self, parser):
         self._addContinentsFilter(parser)

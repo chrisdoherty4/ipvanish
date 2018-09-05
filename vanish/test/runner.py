@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     suites = [
         loader.loadTestsFromModule(test_model)
-        ]
+    ]
 
     all_tests = unittest.TestSuite(suites)
 

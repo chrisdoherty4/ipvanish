@@ -38,7 +38,7 @@ class Connect(Command):
                 countries=arguments['countries'],
                 regions=arguments['regions'],
                 cities=arguments['cities']
-                )
+            )
 
             if not servers:
                 print("No servers available with current filters")
@@ -62,7 +62,7 @@ class Connect(Command):
             server['hostname'],
             server['capacity'],
             server['rtt']
-            ))
+        ))
 
         Vanish.connect(
             os.path.join(
@@ -70,7 +70,7 @@ class Connect(Command):
                 config_file),
             self._services['config']['ovpn.cert'],
             *(arguments['bucket'])
-            )
+        )
 
 
 class PingServers(Command):
@@ -95,7 +95,7 @@ class PingServers(Command):
                 server_handle,
                 str(server['capacity']) + "%",
                 str(server['rtt']) + " ms"
-                ])
+            ])
 
         print(tabulate.tabulate(
             sorted(table),
@@ -131,7 +131,7 @@ class ListContinents(Command):
             sorted(continents.items()),
             headers=headers,
             tablefmt="fancy_grid"
-            ))
+        ))
 
 
 class ListCountries(Command):
@@ -151,7 +151,7 @@ class ListCountries(Command):
             sorted(countries.items()),
             headers=headers,
             tablefmt="fancy_grid"
-            ))
+        ))
 
 
 class ListRegions(Command):
@@ -172,7 +172,7 @@ class ListRegions(Command):
             sorted(regions.items()),
             headers=headers,
             tablefmt="fancy_grid"
-            ))
+        ))
 
 
 class ListCities(Command):
@@ -196,7 +196,7 @@ class ListCities(Command):
             sorted(cities_data),
             headers=headers,
             tablefmt="fancy_grid"
-            ))
+        ))
 
 
 class ListServers(Command):
@@ -215,7 +215,7 @@ class ListServers(Command):
             countries=countries,
             regions=regions,
             cities=cities
-            )
+        )
 
         headers = ['Continent', 'Country', 'Region', 'City', 'Server']
 
@@ -223,10 +223,10 @@ class ListServers(Command):
             (s['continent'], s['country'], s['region'],
              s['city'], s['hostname'].split(".")[0])
             for s in servers
-            ]
+        ]
 
         print(tabulate.tabulate(
             sorted(server_data),
             headers=headers,
             tablefmt="fancy_grid"
-            ))
+        ))

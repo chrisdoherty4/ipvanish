@@ -71,13 +71,13 @@ class OvpnConfigs(object):
                 parts = re.search(
                     '^ipvanish-([A-Z]{2})-.+-([a-z]{3}-[a-c]{1}[0-9]{2}.ovpn)$',
                     file
-                    )
+                )
                 dest = "-".join([parts.group(1), parts.group(2)]).lower()
 
                 os.rename(
                     os.path.join(self._path, file),
                     os.path.join(self._path, dest)
-                    )
+                )
 
         shutil.rmtree(working_dir)
 
@@ -97,7 +97,7 @@ class Vanish(object):
             'openvpn',
             '--config', config_file,
             '--ca', ca_file
-            ]
+        ]
 
         command.extend(kargs)
 
