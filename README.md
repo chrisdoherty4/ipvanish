@@ -5,7 +5,7 @@ Vanish is a command line tool for managing interactions with IPVanish servers.
 
 ## Installing
 
-The package is pushed to pypi so can be installed `pip`.
+The package is pushed to pypi so can be installed with `pip`.
 
 ```
 pip install vanish
