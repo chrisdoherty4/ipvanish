@@ -31,6 +31,9 @@ class Connect(Command):
     """
 
     def execute(self, arguments):
+        print("Updating server status.")
+        self._services['geojson'].update()
+
         if not arguments['server']:
             print("Selecting a server ...")
             servers = self._services['servers'].getServers(
@@ -75,6 +78,9 @@ class Connect(Command):
 
 class PingServers(Command):
     def execute(self, arguments):
+        print("Updating server status.")
+        self._services['geojson'].update()
+
         servers = self._services['servers'].getServers(
             continents=arguments['continents'],
             countries=arguments['countries'],

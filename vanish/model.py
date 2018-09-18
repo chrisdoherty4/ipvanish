@@ -7,7 +7,6 @@ import re
 import shutil
 import json
 import subprocess
-import re
 
 
 class GeoJson(object):

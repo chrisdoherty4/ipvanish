@@ -6,7 +6,6 @@ from .commands import (ListContinents,
                        ListServers,
                        Connect,
                        UpdateOvpnConfigs,
-                       UpdateGeoJson,
                        PingServers,
                        Version)
 from .utils import ServiceProvider, CacheManager
@@ -43,8 +42,7 @@ class Vanish(object):
         if command in self._commands:
             self._commands[command].execute(arguments)
         else:
-            raise RuntimeError(
-                "No command could be found to execute for '{}'".format(command))
+            self._args.getParser().print_help()
 
     def _setupCommands(self):
         self._commands['list.continents'] = lambda: ListContinents(
@@ -61,10 +59,7 @@ class Vanish(object):
 
         self._commands['connect'] = lambda: Connect(self._services)
 
-        self._commands['update-configs'] = lambda: UpdateOvpnConfigs(
-            self._services)
-
-        self._commands['update-servers'] = lambda: UpdateGeoJson(
+        self._commands['sync.ovpn-configs'] = lambda: UpdateOvpnConfigs(
             self._services)
 
         self._commands['ping'] = lambda: PingServers(self._services)
@@ -112,13 +107,15 @@ class _Args(object):
 
         self._addList()
         self._addConnect()
-        self._addConfigsUpdate()
-        self._addServerUpdate()
+        self._addSyncOvpnConfigs()
         self._addPingServer()
         self._addVersion()
 
     def run(self, args=None):
         return vars(self._parser.parse_args(args))
+
+    def getParser(self):
+        return self._parser
 
     def _addVersion(self):
         self._command_parser.add_parser(
@@ -132,13 +129,15 @@ class _Args(object):
         filter_group = ping.add_argument_group('filters')
         self._addAllServerFilters(filter_group)
 
-    def _addConfigsUpdate(self):
-        self._command_parser.add_parser(
-            'update-configs', help="Update the OpenVPN configuration files.")
+    def _addSyncOvpnConfigs(self):
+        configs = self._command_parser.add_parser(
+            'sync', help="Perform an IPVanish synchronisation.")
 
-    def _addServerUpdate(self):
-        self._command_parser.add_parser(
-            'update-servers', help="Update server listing information.")
+        configs.add_argument(
+            'subcommand',
+            metavar='SUBCOMMAND',
+            choices=['ovpn-configs']
+        )
 
     def _addConnect(self):
         connect_parser = self._command_parser.add_parser(
@@ -170,7 +169,6 @@ class _Args(object):
         list_parser.add_argument(
             'subcommand',
             metavar='SUBCOMMAND',
-            nargs='?',
             default='servers',
             choices=['servers', 'continents', 'countries', 'regions', 'cities'])
 
