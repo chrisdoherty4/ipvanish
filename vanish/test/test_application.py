@@ -19,12 +19,6 @@ class TestCommands(unittest.TestCase):
         with self.assertRaises(SystemExit):
             app.run(['invalid-command'])
 
-    def test_incompleteSync(self):
-        app = application.Vanish()
-
-        with self.assertRaises(SystemExit):
-            app.run(['sync'])
-
     def test_incompleteList(self):
         app = application.Vanish()
 

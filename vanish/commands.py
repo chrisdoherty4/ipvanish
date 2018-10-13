@@ -123,12 +123,31 @@ class UpdateOvpnConfigs(Command):
         print("Open VPN configs updated.")
 
 
-class ListContinents(Command):
-    """
-    List continents command
-    """
+class List(Command):
+    def execute(self, args):
+        subcommand = args["subcommand"]
 
-    def execute(self, arguments):
+        if subcommand == "continents":
+            self._continents()
+            exit(0)
+
+        filters = {
+            "continents": args['continents'] if args['continents'] else None,
+            "countries": args['countries'] if args['countries'] else None,
+            "regions": args['regions'] if args['regions'] else None,
+            "cities": args['cities'] if args['cities'] else None,
+            }
+
+        if subcommand == "countries":
+            self._countries(**filters)
+        elif subcommand == "regions":
+            self._regions(**filters)
+        elif subcommand == "cities":
+            self._cities(**filters)
+        else:
+            self._servers(**filters)
+
+    def _continents(self):
         continents = self._services['servers'].getContinents()
 
         headers = ['Code', 'Name']
@@ -139,17 +158,8 @@ class ListContinents(Command):
             tablefmt="fancy_grid"
         ))
 
-
-class ListCountries(Command):
-    """
-    List countries command
-    """
-
-    def execute(self, arguments):
-        continents = arguments['continents'] if arguments['continents'] else None
-
-        countries = self._services['servers'].getCountries(
-            continents=continents)
+    def _countries(self, **filters):
+        countries = self._services['servers'].getCountries(**filters)
 
         headers = ['Code', 'Name']
 
@@ -159,18 +169,8 @@ class ListCountries(Command):
             tablefmt="fancy_grid"
         ))
 
-
-class ListRegions(Command):
-    """
-    List regions command
-    """
-
-    def execute(self, arguments):
-        continents = arguments['continents'] if arguments['continents'] else None
-        countries = arguments['countries'] if arguments['countries'] else None
-
-        regions = self._services['servers'].getRegions(
-            continents=continents, countries=countries)
+    def _regions(self, **filters):
+        regions = self._services['servers'].getRegions(**filters)
 
         headers = ['Code', 'Name']
 
@@ -180,19 +180,8 @@ class ListRegions(Command):
             tablefmt="fancy_grid"
         ))
 
-
-class ListCities(Command):
-    """
-    List cities command
-    """
-
-    def execute(self, arguments):
-        continents = arguments['continents'] if arguments['continents'] else None
-        countries = arguments['countries'] if arguments['countries'] else None
-        regions = arguments['regions'] if arguments['regions'] else None
-
-        cities = self._services['servers'].getCities(
-            continents=continents, countries=countries, regions=regions)
+    def _cities(self, **filters):
+        cities = self._services['servers'].getCities(**filters)
 
         headers = ['Name']
 
@@ -204,24 +193,8 @@ class ListCities(Command):
             tablefmt="fancy_grid"
         ))
 
-
-class ListServers(Command):
-    """
-    List cities command
-    """
-
-    def execute(self, arguments):
-        continents = arguments['continents'] if arguments['continents'] else None
-        countries = arguments['countries'] if arguments['countries'] else None
-        regions = arguments['regions'] if arguments['regions'] else None
-        cities = arguments['regions'] if arguments['regions'] else None
-
-        servers = self._services['servers'].getServers(
-            continents=continents,
-            countries=countries,
-            regions=regions,
-            cities=cities
-        )
+    def _servers(self, **filters):
+        servers = self._services['servers'].getServers(**filters)
 
         headers = ['Continent', 'Country', 'Region', 'City', 'Server']
 

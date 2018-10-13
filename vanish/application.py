@@ -1,9 +1,5 @@
-from argparse import ArgumentParser, RawTextHelpFormatter
-from .commands import (ListContinents,
-                       ListCountries,
-                       ListRegions,
-                       ListCities,
-                       ListServers,
+from argparse import ArgumentParser
+from .commands import (List,
                        Connect,
                        UpdateOvpnConfigs,
                        PingServers,
@@ -14,24 +10,27 @@ from .model import GeoJson, OvpnConfigs, ServerContainer
 
 
 class Vanish(object):
-    """
-    Entrypoint controller for the vanish application.
-    """
-
     def __init__(self):
-        self._args = _Args()
+        """Application coordinator.
 
-        self._services = ServiceProvider()
-        self._setupServices()
+        Coordinates the link between command line interface and business
+        logic classes/command handlers
+        """
+        self._parser = VanishArgumentParser(
+            "vanish",
+            description=(
+                "a tool to manage connections to IP Vanish servers"
+                )
+            )
 
-        self._commands = ServiceProvider()
-        self._setupCommands()
+        self._services = self._setupServices(ServiceProvider())
+        self._commands = self._setupCommands(ServiceProvider())
 
     def run(self, args=None):
         """
         Execute a command based on the arguments passed via command line.
         """
-        arguments = self._args.run(args)
+        arguments = vars(self._parser.parse_args(args))
 
         if 'subcommand' in arguments:
             command = "{}.{}".format(arguments['command'],
@@ -42,145 +41,110 @@ class Vanish(object):
         if command in self._commands:
             self._commands[command].execute(arguments)
         else:
-            self._args.getParser().print_help()
+            self._parser.print_help()
 
-    def _setupCommands(self):
-        self._commands['list.continents'] = lambda: ListContinents(
-            self._services)
+    def _setupCommands(self, provider):
+        provider['list.continents'] = lambda: List(self._services)
+        provider['list.countries'] = lambda: List(self._services)
+        provider['list.regions'] = lambda: List(self._services)
+        provider['list.cities'] = lambda: List(self._services)
+        provider['list.servers'] = lambda: List(self._services)
 
-        self._commands['list.countries'] = lambda: ListCountries(
-            self._services)
+        provider['connect'] = lambda: Connect(self._services)
 
-        self._commands['list.regions'] = lambda: ListRegions(self._services)
+        provider['sync'] = lambda: UpdateOvpnConfigs(self._services)
 
-        self._commands['list.cities'] = lambda: ListCities(self._services)
+        provider['ping'] = lambda: PingServers(self._services)
 
-        self._commands['list.servers'] = lambda: ListServers(self._services)
+        provider['version'] = lambda: Version(self._services)
 
-        self._commands['connect'] = lambda: Connect(self._services)
+        return provider
 
-        self._commands['sync.ovpn-configs'] = lambda: UpdateOvpnConfigs(
-            self._services)
+    def _setupServices(self, provider):
+        provider['config'] = lambda: config
 
-        self._commands['ping'] = lambda: PingServers(self._services)
+        provider['cache'] = ServiceProvider.singleton(
+            lambda: CacheManager(provider['config']['cache.path']))
 
-        self._commands['version'] = lambda: Version(self._services)
-
-    def _setupServices(self):
-        self._services['config'] = lambda: config
-
-        self._services['cache'] = ServiceProvider.singleton(
-            lambda: CacheManager(self._services['config']['cache.path']))
-
-        self._services['servers'] = ServiceProvider.singleton(
+        provider['servers'] = ServiceProvider.singleton(
             lambda: ServerContainer(
-                self._services['config']['geojson.cache.path']
+                provider['config']['geojson.cache.path']
+                )
             )
-        )
 
-        self._services['ovpnconfigs'] = lambda: OvpnConfigs(
-            self._services['config']['ovpn.configs.url'],
-            self._services['config']['ovpn.configs.path'],
-            self._services['cache']
-        )
+        provider['ovpnconfigs'] = lambda: OvpnConfigs(
+            provider['config']['ovpn.configs.url'],
+            provider['config']['ovpn.configs.path'],
+            provider['cache']
+            )
 
-        self._services['geojson'] = lambda: GeoJson(
-            self._services['config']['geojson.url'],
-            self._services['config']['geojson.cache.path'],
-            self._services['cache']
-        )
+        provider['geojson'] = lambda: GeoJson(
+            provider['config']['geojson.url'],
+            provider['config']['geojson.cache.path'],
+            provider['cache']
+            )
+
+        return provider
 
 
-class _Args(object):
-    # TODO: Turn this into an argparser
-    """
-    Defines the arguments that can be parsed by the vanish application.
-    """
+class VanishArgumentParser(ArgumentParser):
 
-    def __init__(self):
-        self._parser = ArgumentParser(
-            "vanish",
-            formatter_class=RawTextHelpFormatter,
-            description='Vanish is a tool that helps users on linux connect to IPVanish VPN servers.')
+    COMMAND = "command"
+    SUBCOMMAND = "subcommand"
 
-        self._command_parser = self._parser.add_subparsers(dest='command')
+    def __init__(self, *args, **kwargs):
+        super(VanishArgumentParser, self).__init__(*args, **kwargs)
 
-        self._addList()
-        self._addConnect()
-        self._addSyncOvpnConfigs()
-        self._addPingServer()
-        self._addVersion()
+        command = self.add_subparsers(
+            dest=self.COMMAND,
+            parser_class=ArgumentParser
+            )
 
-    def run(self, args=None):
-        return vars(self._parser.parse_args(args))
+        ping = command.add_parser('ping', help="ping servers")
+        self._addAllServerFilters(ping.add_argument_group('filters'))
 
-    def getParser(self):
-        return self._parser
+        command.add_parser(
+            "sync",
+            help="sync openvpn config cache with server"
+            )
 
-    def _addVersion(self):
-        self._command_parser.add_parser(
-            'version'
-        )
-
-    def _addPingServer(self):
-        ping = self._command_parser.add_parser(
-            'ping', help='Ping IPVanish servers.')
-
-        filter_group = ping.add_argument_group('filters')
-        self._addAllServerFilters(filter_group)
-
-    def _addSyncOvpnConfigs(self):
-        configs = self._command_parser.add_parser(
-            'sync', help="Perform an IPVanish synchronisation.")
-
-        configs.add_argument(
-            'subcommand',
-            metavar='SUBCOMMAND',
-            choices=['ovpn-configs']
-        )
-
-    def _addConnect(self):
-        connect_parser = self._command_parser.add_parser(
+        connect = command.add_parser(
             'connect',
-            help='Connect to an IPVanish server'
-        )
-
-        connect_parser.add_argument(
-            '--server',
-            metavar="SERVER",
-            default=None,
-        )
-
-        connect_parser.add_argument(
+            help='connect to server'
+            )
+        connect.add_argument(
             'bucket',
             default=None,
             nargs="*"
-        )
+            )
+        self._addAllServerFilters(connect.add_argument_group('filters'))
 
-        filter_group = connect_parser.add_argument_group('filters')
-        self._addAllServerFilters(filter_group)
-
-    def _addList(self):
-        list_parser = self._command_parser.add_parser(
+        list = command.add_parser(
             'list',
-            help='Retrieve server locations or generate a full server list'
+            aliases=['ls'],
+            help='list locations or servers'
         )
-
-        list_parser.add_argument(
-            'subcommand',
-            metavar='SUBCOMMAND',
+        list.add_argument(
+            self.SUBCOMMAND,
+            help="default: servers",
             default='servers',
-            choices=['servers', 'continents', 'countries', 'regions', 'cities'])
+            choices=['servers', 'continents', 'countries', 'regions', 'cities']
+            )
+        self._addAllServerFilters(list.add_argument_group('filters'))
 
-        filter_group = list_parser.add_argument_group('filters')
-        self._addAllServerFilters(filter_group)
+    def _addAllServerFilters(self, parser):
+        self._addContinentsFilter(parser)
+        self._addCountriesFilter(parser)
+        self._addRegionsFilter(parser)
+        self._addCitiesFilter(parser)
 
     def _addContinentsFilter(self, parser):
         parser.add_argument(
             '--continent',
             action='append',
             dest='continents',
-            metavar='CONTINENT'
+            metavar="",
+            help="continent name or code"
         )
 
     def _addCountriesFilter(self, parser):
@@ -188,7 +152,8 @@ class _Args(object):
             '--country',
             action='append',
             dest='countries',
-            metavar='COUNTRY'
+            metavar="",
+            help="country name or code"
         )
 
     def _addRegionsFilter(self, parser):
@@ -196,7 +161,8 @@ class _Args(object):
             '--region',
             action='append',
             dest='regions',
-            metavar='REGION'
+            metavar="",
+            help="region name or code"
         )
 
     def _addCitiesFilter(self, parser):
@@ -204,11 +170,6 @@ class _Args(object):
             '--city',
             action='append',
             dest='cities',
-            metavar='CITY'
+            metavar="",
+            help="city name"
         )
-
-    def _addAllServerFilters(self, parser):
-        self._addContinentsFilter(parser)
-        self._addCountriesFilter(parser)
-        self._addRegionsFilter(parser)
-        self._addCitiesFilter(parser)
