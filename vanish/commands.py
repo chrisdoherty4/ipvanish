@@ -5,10 +5,6 @@ from .__version__ import VERSION
 
 
 class Command(object):
-    """
-    An interface to command objects
-    """
-
     def __init__(self, services):
         super(Command, self).__init__()
         self._services = services
@@ -26,15 +22,11 @@ class Version(Command):
 
 
 class Connect(Command):
-    """
-    Command to connect to the VPN server.
-    """
-
     def execute(self, arguments):
         print("Updating server status.")
         self._services['geojson'].update()
 
-        if not arguments['server']:
+        if "server" not in arguments:
             print("Selecting a server ...")
             servers = self._services['servers'].getServers(
                 continents=arguments['continents'],
@@ -125,6 +117,8 @@ class UpdateOvpnConfigs(Command):
 
 class List(Command):
     def execute(self, args):
+        self._services['geojson'].update()
+
         subcommand = args["subcommand"]
 
         if subcommand == "continents":

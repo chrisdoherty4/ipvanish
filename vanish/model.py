@@ -16,21 +16,22 @@ class GeoJson(object):
         self._cache_path = cache_path
 
     def update(self):
-        # TODO: Consider adding in a configurable geojson cache timeout
         response = requests.get(self._url, allow_redirects=True).json()
 
-        # TODO: Move code out into the GeoJson class when it's made
-
-        # Extract the properties of the geojson
         servers = []
         for server in response:
-            del server['properties']['marker-color']
-            del server['properties']['marker-cluster-small']
-            if server['properties']['countryCode'] == "GB":
-                server['properties']["countryCode"] = "UK"
+            properties = server["properties"]
 
-            servers.append(server['properties'])
+            properties.pop("marker-color")
+            properties.pop("marker-cluster-small")
 
+            # The GB code isn't present in the ovpn configurations so upgrade
+            # to UK which includes GB.
+            if properties['countryCode'] == "GB":
+                properties.update({"countryCode": "uk"})
+
+            servers.append(properties)
+            
         with open(self._cache_path, 'w') as h:
             json.dump(servers, h, indent=4)
 
