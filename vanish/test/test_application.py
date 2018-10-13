@@ -1,22 +1,17 @@
 import unittest
 import sys
 from .. import application
-from cStringIO import StringIO
+from io import StringIO
 
 
 class TestCommands(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.sys_stdout = sys.stdout
-        cls.sys_stderr = sys.stderr
+        cls.out = StringIO()
+        cls.err = StringIO()
 
-        sys.stdout = cls.stdout = StringIO()
-        sys.stderr = cls.stderr = StringIO()
-
-    @classmethod
-    def tearDownClass(cls):
-        sys.stdout = cls.sys_stdout
-        sys.stderr = cls.sys_stderr
+    def setUp(self):
+        sys.stderr = self.err
 
     def test_invalidCommand(self):
         app = application.Vanish()
