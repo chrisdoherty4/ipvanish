@@ -30,7 +30,7 @@ class GeoJson(object):
 
             servers.append(properties)
 
-        with open(self._cache_path, 'w') as h:
+        with open(self._cache_path, 'w+') as h:
             json.dump(servers, h, indent=4)
 
 
@@ -54,7 +54,7 @@ class OvpnConfigs(object):
 
         new_configs = os.path.join(working_dir, 'configs.zip')
 
-        with open(new_configs, 'wb') as h:
+        with open(new_configs, 'w+b') as h:
             h.write(response.content)
 
         with zipfile.ZipFile(new_configs, 'r') as zip:

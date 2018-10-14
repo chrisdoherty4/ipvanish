@@ -12,7 +12,7 @@ class TestCommands(unittest.TestCase):
         cls.app = application.Vanish()
 
     def setUp(self):
-        sys.stderr = self.err
+        # sys.stderr = self.err
         sys.stdout = self.out
 
     def tearDown(self):
