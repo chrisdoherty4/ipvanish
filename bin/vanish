@@ -5,8 +5,17 @@ import os
 try:
     from vanish.application import Vanish
 except ModuleNotFoundError:
-    # TODO: Fix this
-    sys.path.append(os.path.abspath(os.path.join('.')))
+    # Nothing has been installed on this system so we need to hack the path
+    # so we can import the Vanish application
+    #
+    # We know this script lives in ROOT/bin so just add ROOT to the path.
+    sys.path.append(
+        os.path.dirname(
+            os.path.dirname(
+                os.path.abspath(os.path.join(__file__))
+                )
+            )
+        )
     from vanish.application import Vanish
 
 

@@ -169,11 +169,13 @@ class ServerContainer(object):
 
         :return: A dictionary of continents {code: name}
         '''
-        continents = {}
+        codes = []
+        continents = []
 
         for s in self._servers:
-            if s['continentCode'] not in continents:
-                continents[s['continentCode']] = s['continent']
+            if s['continentCode'] not in codes:
+                codes.append(s['continentCode'])
+                continents.append((s['continent'], s['continentCode']))
 
         return continents
 
@@ -189,11 +191,15 @@ class ServerContainer(object):
         if continents:
             servers = self._filterContinents(servers, continents)
 
-        countries = {}
+        codes = []
+        countries = []
 
         for s in servers:
-            if s['countryCode'] not in countries:
-                countries[s['countryCode']] = s['country']
+            if s['countryCode'] not in codes:
+                codes.append(s["countryCode"])
+                countries.append(
+                    (s['continent'], s['country'], s['countryCode'])
+                    )
 
         return countries
 
@@ -213,11 +219,17 @@ class ServerContainer(object):
         if countries:
             servers = self._filterCountries(servers, countries)
 
-        regions = {}
+        codes = []
+        regions = []
 
         for s in servers:
-            if s['regionCode'] not in regions:
-                regions[s['regionCode']] = s['region']
+            if s['region'] and s['regionCode'] not in codes:
+                codes.append(s['regionCode'])
+                regions.append((
+                    s['country'],
+                    s['region'],
+                    s['regionCode']
+                    ))
 
         return regions
 
@@ -243,7 +255,19 @@ class ServerContainer(object):
         if regions:
             servers = self._filterRegions(servers, regions)
 
-        return set([server['city'] for server in servers])
+        cities_added = []
+        cities = []
+
+        for s in servers:
+            if s['city'] not in cities_added:
+                cities_added.append(s['city'])
+                cities.append((
+                    s['continent'],
+                    s['country'],
+                    s['city']
+                    ))
+
+        return cities
 
     def _filterContinents(self, servers, continents):
         return filter(lambda s: s['continent'] in continents or s['continentCode'] in continents, servers)

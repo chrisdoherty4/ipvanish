@@ -1,5 +1,6 @@
 import os
 import tabulate
+import operator
 from .model import Vanish
 from .__version__ import VERSION
 
@@ -149,10 +150,10 @@ class List(Command):
     def _continents(self):
         continents = self._services['servers'].getContinents()
 
-        headers = ['Code', 'Name']
+        headers = ['Name', 'Code']
 
         print(tabulate.tabulate(
-            sorted(continents.items()),
+            sorted(continents, key=lambda e: e[0]),
             headers=headers,
             tablefmt="fancy_grid"
         ))
@@ -162,10 +163,10 @@ class List(Command):
             continents=filters["continents"]
             )
 
-        headers = ['Code', 'Name']
+        headers = ['Continent', 'Code', 'Name']
 
         print(tabulate.tabulate(
-            sorted(countries.items()),
+            sorted(countries, key=lambda e: (e[0], e[1])),
             headers=headers,
             tablefmt="fancy_grid"
         ))
@@ -176,10 +177,10 @@ class List(Command):
             countries=filters["countries"]
             )
 
-        headers = ['Code', 'Name']
+        headers = ['Country', 'Region', 'Code']
 
         print(tabulate.tabulate(
-            sorted(regions.items()),
+            sorted(regions, key=lambda e: (e[0], e[1])),
             headers=headers,
             tablefmt="fancy_grid"
         ))
@@ -191,15 +192,13 @@ class List(Command):
             regions=filters["regions"]
             )
 
-        headers = ['Name']
-
-        cities_data = [[c] for c in cities]
+        headers = ['Continent', 'Country', 'City']
 
         print(tabulate.tabulate(
-            sorted(cities_data),
+            sorted(cities, key=lambda e: (e[0], e[1])),
             headers=headers,
             tablefmt="fancy_grid"
-        ))
+            ))
 
     def _servers(self, filters):
         servers = self._services['servers'].getServers(**filters)
