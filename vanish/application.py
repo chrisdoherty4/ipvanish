@@ -49,6 +49,7 @@ class Vanish(object):
         provider['list.regions'] = lambda: List(self._services)
         provider['list.cities'] = lambda: List(self._services)
         provider['list.servers'] = lambda: List(self._services)
+        provider['list'] = lambda: List(self._services)
 
         provider['connect'] = lambda: Connect(self._services)
 
@@ -126,6 +127,7 @@ class VanishArgumentParser(ArgumentParser):
             self.SUBCOMMAND,
             help="default: servers",
             default='servers',
+            nargs="?",
             choices=['servers', 'continents', 'countries', 'regions', 'cities']
             )
         self._addAllServerFilters(list.add_argument_group('filters'))

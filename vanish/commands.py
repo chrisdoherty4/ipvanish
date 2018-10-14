@@ -4,6 +4,10 @@ from .model import Vanish
 from .__version__ import VERSION
 
 
+class InvalidCommand(RuntimeError):
+    pass
+
+
 class Command(object):
     def __init__(self, services):
         super(Command, self).__init__()
@@ -119,12 +123,6 @@ class List(Command):
     def execute(self, args):
         self._services['geojson'].update()
 
-        subcommand = args["subcommand"]
-
-        if subcommand == "continents":
-            self._continents()
-            return
-
         filters = {
             "continents": args['continents'] if args['continents'] else None,
             "countries": args['countries'] if args['countries'] else None,
@@ -132,14 +130,21 @@ class List(Command):
             "cities": args['cities'] if args['cities'] else None,
             }
 
-        if subcommand == "countries":
-            self._countries(**filters)
-        elif subcommand == "regions":
-            self._regions(**filters)
-        elif subcommand == "cities":
-            self._cities(**filters)
+        if "subcommand" not in args:
+            subcommand = "servers"
         else:
-            self._servers(**filters)
+            subcommand = args["subcommand"]
+
+        if subcommand == "continents":
+            self._continents()
+        elif subcommand == "countries":
+            self._countries(filters)
+        elif subcommand == "regions":
+            self._regions(filters)
+        elif subcommand == "cities":
+            self._cities(filters)
+        else:
+            self._servers(filters)
 
     def _continents(self):
         continents = self._services['servers'].getContinents()
@@ -152,7 +157,7 @@ class List(Command):
             tablefmt="fancy_grid"
         ))
 
-    def _countries(self, **filters):
+    def _countries(self, filters):
         countries = self._services['servers'].getCountries(
             continents=filters["continents"]
             )
@@ -165,7 +170,7 @@ class List(Command):
             tablefmt="fancy_grid"
         ))
 
-    def _regions(self, **filters):
+    def _regions(self, filters):
         regions = self._services['servers'].getRegions(
             continents=filters["continents"],
             countries=filters["countries"]
@@ -179,7 +184,7 @@ class List(Command):
             tablefmt="fancy_grid"
         ))
 
-    def _cities(self, **filters):
+    def _cities(self, filters):
         cities = self._services['servers'].getCities(
             continents=filters["continents"],
             countries=filters["countries"],
@@ -196,7 +201,7 @@ class List(Command):
             tablefmt="fancy_grid"
         ))
 
-    def _servers(self, **filters):
+    def _servers(self, filters):
         servers = self._services['servers'].getServers(**filters)
 
         headers = ['Continent', 'Country', 'Region', 'City', 'Server']

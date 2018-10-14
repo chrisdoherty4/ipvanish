@@ -9,8 +9,6 @@ from .. import model, utils
 class TestGeoJson(unittest.TestCase):
     def setUp(self):
         self.working_dir = tempfile.mkdtemp()
-        self.cache = utils.PersistentCache(
-            os.path.join(self.working_dir, 'cache'))
         self.geojson_file = os.path.join(self.working_dir, 'geojson')
 
     def tearDown(self):
@@ -19,8 +17,7 @@ class TestGeoJson(unittest.TestCase):
     def test_update(self):
         geojson = model.GeoJson(
             "https://www.ipvanish.com/api/servers.geojson",
-            self.geojson_file,
-            self.cache
+            self.geojson_file
         )
 
         current_time = time.time()
@@ -36,8 +33,7 @@ class TestGeoJson(unittest.TestCase):
     def test_badGeoJsonWrite(self):
         geojson = model.GeoJson(
             "https://www.ipvanish.com/api/servers.geojson",
-            os.path.join(self.working_dir, "fake", "path"),
-            self.cache
+            os.path.join(self.working_dir, "fake", "path")
         )
 
         with self.assertRaises(IOError, msg="Success with invalid write path."):
@@ -47,8 +43,6 @@ class TestGeoJson(unittest.TestCase):
 class TestOvpnConfig(unittest.TestCase):
     def setUp(self):
         self.working_dir = tempfile.mkdtemp()
-        self.cache = utils.PersistentCache(
-            os.path.join(self.working_dir, 'cache'))
         self.config_path = os.path.join(self.working_dir, 'ovpn')
 
         os.makedirs(self.config_path)
@@ -59,8 +53,7 @@ class TestOvpnConfig(unittest.TestCase):
     def test_update(self):
         ovpn = model.OvpnConfigs(
             "https://www.ipvanish.com/software/configs/configs.zip",
-            self.config_path,
-            self.cache
+            self.config_path
         )
 
         ovpn.update()
