@@ -13,5 +13,6 @@ if __name__ == "__main__":
     ]
 
     all_tests = unittest.TestSuite(suites)
+    result = unittest.TextTestRunner(verbosity=2).run(all_tests)
 
-    sys.exit(unittest.TextTestRunner(verbosity=2).run(all_tests).wasSuccessful())
+    sys.exit(len(result.errors))
