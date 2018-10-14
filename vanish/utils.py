@@ -1,10 +1,8 @@
 import hashlib
 import json
-import os
 
 
 class ServiceProvider(dict):
-    # TODO: Comment class
     class _Singleton(object):
         def __init__(self, callable):
             self._instance = None
@@ -36,42 +34,33 @@ class ServiceProvider(dict):
         return ServiceProvider._Singleton(callback)
 
 
-class CacheManager(object):
+class PersistentCache(dict):
 
-    def __init__(self, cache_file):
+    def __init__(self, cache_path):
         """A manager for caching arbirary data.
 
-        :param cache_file: Path to the file we should use for caching.
+        :param cache_path: Path to the file we should use for caching.
         """
-        self._cache_file = cache_file
-        self._cache = {}
-        self._loaded = False
+        self._cache_path = cache_path
 
-        self.load(self._cache_file)
+        try:
+            with open(cache_path) as h:
+                self = json.loads(h.read())
+        except IOError() as e:
+            print("Could not open cache file {}".format(e))
+            raise
 
-    def loaded(self):
-        return self._loaded
+    def _write(self):
+        with open(self._cache_path, 'w') as h:
+            h.write(json.dumps(self))
 
-    def load(self, path):
-        if os.path.exists(path):
-            with open(path) as h:
-                self._cache = json.loads(h.read())
-                self._loaded = True
+    def __setattr__(self, key, value):
+        super(PersistentCache, self).__setattr__(key, value)
+        self._write()
 
-    def write(self, path):
-        with open(path, 'w') as h:
-            h.write(json.dumps(self._cache))
-
-    def save(self, key, value):
-        self._cache[key] = value
-        self.write(self._cache_file)
-
-    def get(self, key):
-        if not self._loaded:
-            raise RuntimeError(
-                "Tried accessing cache value before cache file loaded")
-
-        return self._cache[key]
+    def ___delattr__(self, key):
+        super(PersistentCache, self).__delattr__(key)
+        self._write()
 
 
 def sha256_checksum(filename, block_size=65536):

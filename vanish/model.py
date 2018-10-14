@@ -1,5 +1,4 @@
 import requests
-import time
 import os
 import tempfile
 import zipfile
@@ -10,8 +9,7 @@ import subprocess
 
 
 class GeoJson(object):
-    def __init__(self, url, cache_path, cache):
-        self._cache = cache
+    def __init__(self, url, cache_path):
         self._url = url
         self._cache_path = cache_path
 
@@ -31,24 +29,20 @@ class GeoJson(object):
                 properties.update({"countryCode": "uk"})
 
             servers.append(properties)
-            
+
         with open(self._cache_path, 'w') as h:
             json.dump(servers, h, indent=4)
 
-        self._cache.save('geojson', int(time.time()))
-
 
 class OvpnConfigs(object):
-    def __init__(self, url, path, cache):
-        """Consructor.
+    def __init__(self, url, path):
+        """OvpnConfigs.
 
         :param url: URL ovpn configs zip file.
         :param path: Path to write ovpn configs.
-        :param cache: A CacheManager instance.
         """
         self._url = url
         self._path = path
-        self._cache = cache
 
     def update(self):
         working_dir = tempfile.mkdtemp()
@@ -80,8 +74,6 @@ class OvpnConfigs(object):
                 )
 
         shutil.rmtree(working_dir)
-
-        self._cache.save('ovpnconfigs', time.time())
 
 
 class Vanish(object):

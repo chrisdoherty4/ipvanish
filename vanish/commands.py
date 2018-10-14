@@ -123,7 +123,7 @@ class List(Command):
 
         if subcommand == "continents":
             self._continents()
-            exit(0)
+            return
 
         filters = {
             "continents": args['continents'] if args['continents'] else None,
@@ -153,7 +153,9 @@ class List(Command):
         ))
 
     def _countries(self, **filters):
-        countries = self._services['servers'].getCountries(**filters)
+        countries = self._services['servers'].getCountries(
+            continents=filters["continents"]
+            )
 
         headers = ['Code', 'Name']
 
@@ -164,7 +166,10 @@ class List(Command):
         ))
 
     def _regions(self, **filters):
-        regions = self._services['servers'].getRegions(**filters)
+        regions = self._services['servers'].getRegions(
+            continents=filters["continents"],
+            countries=filters["countries"]
+            )
 
         headers = ['Code', 'Name']
 
@@ -175,7 +180,11 @@ class List(Command):
         ))
 
     def _cities(self, **filters):
-        cities = self._services['servers'].getCities(**filters)
+        cities = self._services['servers'].getCities(
+            continents=filters["continents"],
+            countries=filters["countries"],
+            regions=filters["regions"]
+            )
 
         headers = ['Name']
 

@@ -9,7 +9,7 @@ from .. import model, utils
 class TestGeoJson(unittest.TestCase):
     def setUp(self):
         self.working_dir = tempfile.mkdtemp()
-        self.cache = utils.CacheManager(
+        self.cache = utils.PersistentCache(
             os.path.join(self.working_dir, 'cache'))
         self.geojson_file = os.path.join(self.working_dir, 'geojson')
 
@@ -47,7 +47,7 @@ class TestGeoJson(unittest.TestCase):
 class TestOvpnConfig(unittest.TestCase):
     def setUp(self):
         self.working_dir = tempfile.mkdtemp()
-        self.cache = utils.CacheManager(
+        self.cache = utils.PersistentCache(
             os.path.join(self.working_dir, 'cache'))
         self.config_path = os.path.join(self.working_dir, 'ovpn')
 

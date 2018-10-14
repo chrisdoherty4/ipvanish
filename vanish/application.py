@@ -4,7 +4,7 @@ from .commands import (List,
                        UpdateOvpnConfigs,
                        PingServers,
                        Version)
-from .utils import ServiceProvider, CacheManager
+from .utils import ServiceProvider, PersistentCache
 from .config import config
 from .model import GeoJson, OvpnConfigs, ServerContainer
 
@@ -64,7 +64,7 @@ class Vanish(object):
         provider['config'] = lambda: config
 
         provider['cache'] = ServiceProvider.singleton(
-            lambda: CacheManager(provider['config']['cache.path']))
+            lambda: PersistentCache(provider['config']['cache.path']))
 
         provider['servers'] = ServiceProvider.singleton(
             lambda: ServerContainer(
@@ -74,14 +74,12 @@ class Vanish(object):
 
         provider['ovpnconfigs'] = lambda: OvpnConfigs(
             provider['config']['ovpn.configs.url'],
-            provider['config']['ovpn.configs.path'],
-            provider['cache']
+            provider['config']['ovpn.configs.path']
             )
 
         provider['geojson'] = lambda: GeoJson(
             provider['config']['geojson.url'],
-            provider['config']['geojson.cache.path'],
-            provider['cache']
+            provider['config']['geojson.cache.path']
             )
 
         return provider
