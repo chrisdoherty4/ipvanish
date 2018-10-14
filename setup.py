@@ -1,7 +1,8 @@
 from setuptools import setup
 from codecs import open
-from os import path
+from os import path, makedirs
 from vanish.__version__ import VERSION
+from vanish.config import config
 
 here = path.abspath(path.dirname(__file__))
 
@@ -10,6 +11,9 @@ with open(path.join(here, 'requirements.txt'), encoding="utf-8") as f:
 
 with open(path.join(here, 'README.md'), encoding="utf-8") as f:
     long_description = f.read()
+
+if not path.exists(config["ovpn.configs.path"]):
+    makedirs(config["ovpn.configs.path"])
 
 setup(
     name='vanish',
@@ -36,8 +40,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Natural Language :: English',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3 :: Only'
     ],
 
     keywords='ipvanish vanish vpn openvpn',

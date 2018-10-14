@@ -1,3 +1,4 @@
+import sys
 import unittest
 from . import test_model
 from . import test_application
@@ -13,4 +14,4 @@ if __name__ == "__main__":
 
     all_tests = unittest.TestSuite(suites)
 
-    unittest.TextTestRunner(verbosity=2).run(all_tests)
+    sys.exit(unittest.TextTestRunner(verbosity=2).run(all_tests).wasSuccessful())
