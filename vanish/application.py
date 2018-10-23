@@ -18,72 +18,62 @@ class Vanish(object):
         """
         self._parser = VanishArgumentParser(
             "vanish",
-            description=(
-                "a tool to manage connections to IP Vanish servers"
-                )
+            description=("a tool to manage connections to IP Vanish servers")
             )
 
-        self._services = self._setupServices(ServiceProvider())
-        self._commands = self._setupCommands(ServiceProvider())
+        self._services = ServiceProvider()
+        self._setupServices(self._services)
+        self._setupCommands(self._services)
 
     def run(self, args=None):
-        """
-        Execute a command based on the arguments passed via command line.
-        """
         arguments = vars(self._parser.parse_args(args))
 
-        if 'subcommand' in arguments:
-            command = "{}.{}".format(arguments['command'],
-                                     arguments['subcommand'])
+        if VanishArgumentParser.SUBCOMMAND in arguments:
+            command = "cmd.{}.{}".format(
+                arguments[VanishArgumentParser.COMMAND],
+                arguments[VanishArgumentParser.SUBCOMMAND]
+                )
         else:
-            command = arguments['command']
+            command = "cmd.{}".format(arguments[VanishArgumentParser.COMMAND])
 
-        if command in self._commands:
-            self._commands[command].execute(arguments)
+        if command in self._services:
+            self._services[command].execute(arguments)
         else:
             self._parser.print_help()
 
     def _setupCommands(self, provider):
-        provider['list.continents'] = lambda: List(self._services)
-        provider['list.countries'] = lambda: List(self._services)
-        provider['list.regions'] = lambda: List(self._services)
-        provider['list.cities'] = lambda: List(self._services)
-        provider['list.servers'] = lambda: List(self._services)
-        provider['list'] = lambda: List(self._services)
-
-        provider['connect'] = lambda: Connect(self._services)
-
-        provider['sync'] = lambda: UpdateOvpnConfigs(self._services)
-
-        provider['ping'] = lambda: PingServers(self._services)
-
-        provider['version'] = lambda: Version(self._services)
-
-        return provider
+        provider.update({
+            'cmd.list.continents': lambda p: List(p),
+            'cmd.list.countries': lambda p: List(p),
+            'cmd.list.regions': lambda p: List(p),
+            'cmd.list.cities': lambda p: List(p),
+            'cmd.list.servers': lambda p: List(p),
+            'cmd.list': lambda p: List(p),
+            'cmd.connect': lambda p: Connect(p),
+            'cmd.sync': lambda p: UpdateOvpnConfigs(p),
+            'cmd.ping': lambda p: PingServers(p),
+            'cmd.version': lambda p: Version(p)
+            })
 
     def _setupServices(self, provider):
-        provider['config'] = lambda: config
+        provider.update({
+            'config': lambda p: config,
+            'cache': ServiceProvider.singleton(
+                lambda p: PersistentCache(p['config']['cache.path'])
+                ),
+            'servers': ServiceProvider.singleton(
+                lambda p: ServerContainer(p['geojson'])
+                ),
+            'ovpnconfigs': lambda p: OvpnConfigs(
+                p['config']['ovpn.configs.url'],
+                p['config']['ovpn.configs.path']
+                ),
+            'geojson': lambda p: GeoJson(
+                p['config']['geojson.url'],
+                p['config']['geojson.cache.path']
+                ),
 
-        provider['cache'] = ServiceProvider.singleton(
-            lambda: PersistentCache(provider['config']['cache.path']))
-
-        provider['servers'] = ServiceProvider.singleton(
-            lambda: ServerContainer(
-                provider['config']['geojson.cache.path']
-                )
-            )
-
-        provider['ovpnconfigs'] = lambda: OvpnConfigs(
-            provider['config']['ovpn.configs.url'],
-            provider['config']['ovpn.configs.path']
-            )
-
-        provider['geojson'] = lambda: GeoJson(
-            provider['config']['geojson.url'],
-            provider['config']['geojson.cache.path']
-            )
-
-        return provider
+            })
 
 
 class VanishArgumentParser(ArgumentParser):

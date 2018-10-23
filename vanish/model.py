@@ -13,6 +13,12 @@ class GeoJson(object):
         self._url = url
         self._cache_path = cache_path
 
+        if not os.path.exists(self._cache_path):
+            self.update()
+        else:
+            with open(self._cache_path) as f:
+                self.servers = json.load(f)
+
     def update(self):
         response = requests.get(self._url, allow_redirects=True).json()
 
@@ -32,6 +38,8 @@ class GeoJson(object):
 
         with open(self._cache_path, 'w+') as h:
             json.dump(servers, h, indent=4)
+
+        self.servers = servers
 
 
 class OvpnConfigs(object):
@@ -120,9 +128,8 @@ class Vanish(object):
 
 
 class ServerContainer(object):
-    def __init__(self, server_json_path):
-        with open(server_json_path, 'r') as h:
-            self._servers = json.load(h)
+    def __init__(self, geojson):
+        self._servers = geojson.servers
 
     def getServers(self,
                    continents=None,

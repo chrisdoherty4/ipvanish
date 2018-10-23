@@ -8,9 +8,9 @@ class ServiceProvider(dict):
             self._instance = None
             self._callable = callable
 
-        def __call__(self):
+        def __call__(self, provider):
             if not self._instance:
-                self._instance = self._callable()
+                self._instance = self._callable(provider)
 
             return self._instance
 
@@ -18,7 +18,7 @@ class ServiceProvider(dict):
         super(ServiceProvider, self).__init__(*args, **kwargs)
 
     def __getitem__(self, key):
-        return super(ServiceProvider, self).__getitem__(key)()
+        return super(ServiceProvider, self).__getitem__(key)(self)
 
     def __setitem__(self, key, value):
         if not callable(value):
