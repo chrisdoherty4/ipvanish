@@ -26,7 +26,7 @@ class GeoJson(object):
             # The GB code isn't present in the ovpn configurations so upgrade
             # to UK which includes GB.
             if properties['countryCode'] == "GB":
-                properties.update({"countryCode": "uk"})
+                properties.update({"countryCode": "UK"})
 
             servers.append(properties)
 
@@ -120,13 +120,7 @@ class Vanish(object):
 
 
 class ServerContainer(object):
-    '''
-    A container that wraps server information and is queryable.
-    '''
-
     def __init__(self, server_json_path):
-        """Constructor.
-        """
         with open(server_json_path, 'r') as h:
             self._servers = json.load(h)
 
@@ -237,8 +231,6 @@ class ServerContainer(object):
         '''
         Retrieve cities with optional filters.
 
-        Filters can combin the name/code values.
-
         :param continents: A list of continent names or codes
         :param countries: A list of country names of codes
         :param regions: A list of region names, codes, or abbreviations
@@ -270,13 +262,21 @@ class ServerContainer(object):
         return cities
 
     def _filterContinents(self, servers, continents):
-        return filter(lambda s: s['continent'] in continents or s['continentCode'] in continents, servers)
+        continents = list(map(lambda c: c.lower(), continents))
+        return filter(lambda s: s['continent'].lower() in continents
+            or s['continentCode'].lower() in continents, servers)
 
     def _filterCountries(self, servers, countries):
-        return filter(lambda s: s['country'] in countries or s['countryCode'] in countries, servers)
+        countries = list(map(lambda c: c.lower(), countries))
+        return filter(lambda s: s['country'].lower() in countries
+            or s['countryCode'].lower() in countries, servers)
 
     def _filterRegions(self, servers, regions):
-        return filter(lambda s: s['region'] in regions or s['regionCode'] in regions or s['regionAbbr'] in regions, servers)
+        regions = list(map(lambda c: c.lower(), regions))
+        return filter(lambda s: s['region'].lower() in regions
+            or s['regionCode'].lower() in regions
+            or s['regionAbbr'].lower() in regions, servers)
 
     def _filterCities(self, servers, cities):
-        return filter(lambda x: x['city'] in cities, servers)
+        cities = list(map(lambda c: c.lower(), cities))
+        return filter(lambda x: x['city'].lower() in cities, servers)
