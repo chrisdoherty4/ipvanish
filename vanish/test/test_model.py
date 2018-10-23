@@ -2,7 +2,9 @@ import unittest
 import tempfile
 import shutil
 import os
+import sys
 import time
+from io import StringIO
 from .. import model, utils
 
 
@@ -31,13 +33,14 @@ class TestGeoJson(unittest.TestCase):
             self.geojson_file), "Geojson file was not updated")
 
     def test_badGeoJsonWrite(self):
-        geojson = model.GeoJson(
-            "https://www.ipvanish.com/api/servers.geojson",
-            os.path.join(self.working_dir, "fake", "path")
-        )
 
-        with self.assertRaises(IOError, msg="Success with invalid write path."):
-            geojson.update()
+        sys.stderr = err = StringIO()
+
+        with self.assertRaises(FileNotFoundError, msg="Success with invalid path"):
+            geojson = model.GeoJson(
+                "https://www.ipvanish.com/api/servers.geojson",
+                os.path.join(self.working_dir, "fake", "path")
+            )
 
 
 class TestOvpnConfig(unittest.TestCase):

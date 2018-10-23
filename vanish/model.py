@@ -6,6 +6,7 @@ import re
 import shutil
 import json
 import subprocess
+import sys
 
 
 class GeoJson(object):
@@ -36,8 +37,12 @@ class GeoJson(object):
 
             servers.append(properties)
 
-        with open(self._cache_path, 'w+') as h:
-            json.dump(servers, h, indent=4)
+        try:
+            with open(self._cache_path, 'w+') as h:
+                json.dump(servers, h, indent=4)
+        except FileNotFoundError as e:
+            print("Invalid path {}".format(self._cache_path), file=sys.stderr)
+            raise e
 
         self.servers = servers
 
